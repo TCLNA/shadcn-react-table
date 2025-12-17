@@ -10,7 +10,7 @@ import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField, { type TextFieldProps } from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip } from '../base-ui';
 import { debounce } from '@mui/material/utils';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';

@@ -1,6 +1,6 @@
 import { type MouseEvent, useState } from 'react';
 import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip } from '../base-ui';
 import { MRT_EditActionButtons } from './MRT_EditActionButtons';
 import {
   type MRT_Cell,

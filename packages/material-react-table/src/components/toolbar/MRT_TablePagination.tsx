@@ -5,7 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Pagination, { type PaginationProps } from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
 import Select, { type SelectProps } from '@mui/material/Select';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip } from '../base-ui';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';

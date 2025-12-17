@@ -1,4 +1,4 @@
-import Menu, { type MenuProps } from '@mui/material/Menu';
+import { Menu, type MenuProps } from '../base-ui';
 import { MRT_ActionMenuItem } from './MRT_ActionMenuItem';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
 import { openEditingCell } from '../../utils/cell.utils';
@@ -86,9 +86,6 @@ export const MRT_CellActionMenu = <TData extends MRT_RowData>({
       <Menu
         MenuListProps={{
           dense: density === 'compact',
-          sx: {
-            backgroundColor: menuBackgroundColor,
-          },
         }}
         anchorEl={actionCellRef.current}
         disableScrollLock

@@ -1,8 +1,11 @@
-import Dialog, { type DialogProps } from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
 import Stack from '@mui/material/Stack';
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  type DialogProps,
+} from '../base-ui';
 import {
   type MRT_Row,
   type MRT_RowData,

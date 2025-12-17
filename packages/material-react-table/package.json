@@ -39,7 +39,7 @@
     },
     {
       "path": "dist/index.esm.js",
-      "limit": "51 KB"
+      "limit": "51.5 KB"
     }
   ],
   "engines": {
@@ -104,6 +104,7 @@
     "vite": "^6.0.5"
   },
   "peerDependencies": {
+    "@base-ui/react": ">=1.0.0",
     "@emotion/react": ">=11.13",
     "@emotion/styled": ">=11.13",
     "@mui/icons-material": ">=6",
@@ -113,6 +114,7 @@
     "react-dom": ">=18.0"
   },
   "dependencies": {
+    "@base-ui/react": "^1.0.0",
     "@tanstack/match-sorter-utils": "8.19.4",
     "@tanstack/react-table": "8.20.6",
     "@tanstack/react-virtual": "3.11.2",

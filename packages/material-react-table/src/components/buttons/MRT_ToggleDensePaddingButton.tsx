@@ -1,5 +1,5 @@
 import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip } from '../base-ui';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
 
 export interface MRT_ToggleDensePaddingButtonProps<TData extends MRT_RowData>

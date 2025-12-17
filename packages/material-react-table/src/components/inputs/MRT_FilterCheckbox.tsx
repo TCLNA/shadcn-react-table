@@ -1,6 +1,6 @@
 import Checkbox, { type CheckboxProps } from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip } from '../base-ui';
 import {
   type MRT_Column,
   type MRT_RowData,

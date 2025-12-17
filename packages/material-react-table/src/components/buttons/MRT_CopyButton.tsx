@@ -1,6 +1,6 @@
 import { type MouseEvent, useState } from 'react';
 import Button, { type ButtonProps } from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip } from '../base-ui';
 import {
   type MRT_Cell,
   type MRT_RowData,

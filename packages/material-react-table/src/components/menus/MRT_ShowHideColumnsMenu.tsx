@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import Menu, { type MenuProps } from '@mui/material/Menu';
+import { Box, Menu, type MenuProps } from '../base-ui';
 import { MRT_ShowHideColumnsMenuItems } from './MRT_ShowHideColumnsMenuItems';
 import {
   type MRT_Column,
@@ -105,9 +104,6 @@ export const MRT_ShowHideColumnsMenu = <TData extends MRT_RowData>({
     <Menu
       MenuListProps={{
         dense: density === 'compact',
-        sx: {
-          backgroundColor: menuBackgroundColor,
-        },
       }}
       anchorEl={anchorEl}
       disableScrollLock
@@ -116,7 +112,7 @@ export const MRT_ShowHideColumnsMenu = <TData extends MRT_RowData>({
       {...rest}
     >
       <Box
-        sx={{
+        style={{
           display: 'flex',
           justifyContent: 'space-between',
           p: '0.5rem',
