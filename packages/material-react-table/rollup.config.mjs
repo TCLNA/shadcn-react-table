@@ -8,6 +8,7 @@ import external from 'rollup-plugin-peer-deps-external';
 export default [
   {
     external: [
+      '@base-ui/react',
       '@mui/icons-material',
       '@mui/material',
       '@mui/x-date-pickers',

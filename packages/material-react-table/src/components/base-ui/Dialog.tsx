@@ -2,13 +2,13 @@
  * Base UI Dialog wrapper with shadcn styling
  * Replaces @mui/material/Dialog
  */
-import * as BaseDialog from '@base-ui/react/Dialog';
+import { Dialog as BaseDialog } from '@base-ui/react';
 import { type ReactNode } from 'react';
 
 export interface DialogProps {
   children: ReactNode;
   open: boolean;
-  onClose: (event?: any, reason?: 'backdropClick' | 'escapeKeyDown') => void;
+  onClose: (event: any, reason: 'backdropClick' | 'escapeKeyDown') => void;
   fullWidth?: boolean;
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
   [key: string]: any;
@@ -42,7 +42,7 @@ export const Dialog = ({
 }: DialogProps) => {
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      onClose?.({}, 'backdropClick');
+      onClose({}, 'backdropClick');
     }
   };
 

@@ -2,7 +2,7 @@
  * Base UI Tooltip wrapper with shadcn styling
  * Replaces @mui/material/Tooltip
  */
-import * as BaseTooltip from '@base-ui/react/Tooltip';
+import { Tooltip as BaseTooltip } from '@base-ui/react';
 import { type ReactElement, type ReactNode } from 'react';
 
 export interface TooltipProps {

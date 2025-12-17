@@ -2,7 +2,7 @@
  * Base UI Menu wrapper with shadcn styling
  * Replaces @mui/material/Menu
  */
-import * as BaseMenu from '@base-ui/react/Menu';
+import { Menu as BaseMenu } from '@base-ui/react';
 import { type ReactNode, useEffect, useRef } from 'react';
 
 export interface MenuProps {
@@ -32,9 +32,12 @@ export interface MenuItemProps {
   disabled?: boolean;
   selected?: boolean;
   divider?: boolean;
-  sx?: Record<string, any>;
+  sx?: Record<string, any> | ((theme: any) => Record<string, any>);
   tabIndex?: number;
   value?: any;
+  disableRipple?: boolean;
+  ref?: any;
+  [key: string]: any;
 }
 
 export const Menu = ({
@@ -46,7 +49,6 @@ export const Menu = ({
   transformOrigin,
   disableScrollLock,
   MenuListProps,
-  ...rest
 }: MenuProps) => {
   const positionerRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +68,7 @@ export const Menu = ({
   if (!open) return null;
 
   return (
-    <BaseMenu.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <BaseMenu.Root open={open} onOpenChange={(isOpen: boolean) => !isOpen && onClose()}>
       <div ref={positionerRef}>
         <BaseMenu.Popup className={`menu-popup ${MenuListProps?.dense ? 'dense' : ''}`}>
           {children}
@@ -125,13 +127,15 @@ export const MenuItem = ({
 export const Box = ({
   children,
   sx,
+  style,
   ...rest
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   sx?: Record<string, any>;
+  style?: React.CSSProperties;
   [key: string]: any;
 }) => {
-  return <div {...rest}>{children}</div>;
+  return <div style={style} {...rest}>{children}</div>;
 };
 
 export const ListItemIcon = ({

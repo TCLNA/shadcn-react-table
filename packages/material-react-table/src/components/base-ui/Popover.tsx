@@ -2,14 +2,14 @@
  * Base UI Popover wrapper with shadcn styling
  * Replaces @mui/material/Popover
  */
-import * as BasePopover from '@base-ui/react/Popover';
+import { Popover as BasePopover } from '@base-ui/react';
 import { type ReactNode, useEffect, useRef } from 'react';
 
 export interface PopoverProps {
   anchorEl: HTMLElement | null;
   children: ReactNode;
   open: boolean;
-  onClose: () => void;
+  onClose: (event?: any) => void;
   anchorOrigin?: {
     horizontal: 'left' | 'center' | 'right';
     vertical: 'top' | 'center' | 'bottom';
@@ -48,7 +48,7 @@ export const Popover = ({
   if (!open) return null;
 
   return (
-    <BasePopover.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <BasePopover.Root open={open} onOpenChange={(isOpen: boolean) => !isOpen && onClose()}>
       <div ref={positionerRef}>
         <BasePopover.Popup className="popover-popup" {...rest}>
           {children}
