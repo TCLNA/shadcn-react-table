@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import Menu, { type MenuProps } from '@mui/material/Menu';
+import { Menu, type MenuProps } from '../base-ui';
 import { MRT_ActionMenuItem } from './MRT_ActionMenuItem';
 import {
   type MRT_FilterOption,
@@ -242,9 +242,6 @@ export const MRT_FilterOptionMenu = <TData extends MRT_RowData>({
     <Menu
       MenuListProps={{
         dense: density === 'compact',
-        sx: {
-          backgroundColor: menuBackgroundColor,
-        },
       }}
       anchorEl={anchorEl}
       anchorOrigin={{ horizontal: 'right', vertical: 'center' }}

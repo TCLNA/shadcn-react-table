@@ -17,7 +17,7 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 import TextField, { type TextFieldProps } from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip } from '../base-ui';
 import { debounce } from '@mui/material/utils';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';

@@ -1,7 +1,7 @@
 import { type MouseEvent } from 'react';
 import Checkbox, { type CheckboxProps } from '@mui/material/Checkbox';
 import Radio, { type RadioProps } from '@mui/material/Radio';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip } from '../base-ui';
 import { type Theme } from '@mui/material/styles';
 import {
   type MRT_Row,

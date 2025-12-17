@@ -1,9 +1,7 @@
 import { type MouseEvent, useState } from 'react';
-import Box from '@mui/material/Box';
 import Grow from '@mui/material/Grow';
 import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Popover from '@mui/material/Popover';
-import Tooltip from '@mui/material/Tooltip';
+import { Box, Popover, Tooltip } from '../base-ui';
 import { MRT_TableHeadCellFilterContainer } from './MRT_TableHeadCellFilterContainer';
 import {
   type MRT_Header,

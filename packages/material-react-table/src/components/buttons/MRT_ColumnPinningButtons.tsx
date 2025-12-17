@@ -1,6 +1,6 @@
 import Box, { type BoxProps } from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip } from '../base-ui';
 import {
   type MRT_Column,
   type MRT_RowData,
