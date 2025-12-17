@@ -21,6 +21,7 @@ export interface MenuProps {
   disableScrollLock?: boolean;
   MenuListProps?: {
     dense?: boolean;
+    /** @deprecated sx prop is not supported in Base UI. Styling is handled via CSS classes. */
     sx?: Record<string, any>;
   };
 }
@@ -32,9 +33,11 @@ export interface MenuItemProps {
   disabled?: boolean;
   selected?: boolean;
   divider?: boolean;
+  /** @deprecated sx prop is not supported in Base UI. Use className instead. */
   sx?: Record<string, any> | ((theme: any) => Record<string, any>);
   tabIndex?: number;
   value?: any;
+  /** @deprecated disableRipple is not applicable in Base UI */
   disableRipple?: boolean;
   ref?: any;
   [key: string]: any;
@@ -57,10 +60,44 @@ export const Menu = ({
       const rect = anchorEl.getBoundingClientRect();
       const positioner = positionerRef.current;
       
+      // Calculate position based on anchorOrigin
+      let top = rect.top;
+      let left = rect.left;
+      
+      if (anchorOrigin) {
+        switch (anchorOrigin.vertical) {
+          case 'top':
+            top = rect.top;
+            break;
+          case 'center':
+            top = rect.top + rect.height / 2;
+            break;
+          case 'bottom':
+            top = rect.bottom;
+            break;
+        }
+        
+        switch (anchorOrigin.horizontal) {
+          case 'left':
+            left = rect.left;
+            break;
+          case 'center':
+            left = rect.left + rect.width / 2;
+            break;
+          case 'right':
+            left = rect.right;
+            break;
+        }
+      } else {
+        // Default: bottom-left
+        top = rect.bottom;
+        left = rect.left;
+      }
+      
       // Position the menu relative to the anchor element
       positioner.style.position = 'fixed';
-      positioner.style.top = `${rect.bottom}px`;
-      positioner.style.left = `${rect.left}px`;
+      positioner.style.top = `${top}px`;
+      positioner.style.left = `${left}px`;
       positioner.style.zIndex = '50';
     }
   }, [open, anchorEl, anchorOrigin, transformOrigin]);
@@ -131,6 +168,7 @@ export const Box = ({
   ...rest
 }: {
   children?: ReactNode;
+  /** @deprecated sx prop is not supported in Base UI. Use style or className instead. */
   sx?: Record<string, any>;
   style?: React.CSSProperties;
   [key: string]: any;

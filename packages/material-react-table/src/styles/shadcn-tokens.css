@@ -382,6 +382,10 @@
   color: hsl(var(--accent-foreground));
 }
 
+.shadcn-button-ghost {
+  background-color: transparent;
+}
+
 .shadcn-button-ghost:hover {
   background-color: hsl(var(--accent));
   color: hsl(var(--accent-foreground));

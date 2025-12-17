@@ -37,10 +37,44 @@ export const Popover = ({
       const rect = anchorEl.getBoundingClientRect();
       const positioner = positionerRef.current;
       
+      // Calculate position based on anchorOrigin
+      let top = rect.top;
+      let left = rect.left;
+      
+      if (anchorOrigin) {
+        switch (anchorOrigin.vertical) {
+          case 'top':
+            top = rect.top;
+            break;
+          case 'center':
+            top = rect.top + rect.height / 2;
+            break;
+          case 'bottom':
+            top = rect.bottom;
+            break;
+        }
+        
+        switch (anchorOrigin.horizontal) {
+          case 'left':
+            left = rect.left;
+            break;
+          case 'center':
+            left = rect.left + rect.width / 2;
+            break;
+          case 'right':
+            left = rect.right;
+            break;
+        }
+      } else {
+        // Default: bottom-left
+        top = rect.bottom;
+        left = rect.left;
+      }
+      
       // Position the popover relative to the anchor element
       positioner.style.position = 'fixed';
-      positioner.style.top = `${rect.bottom}px`;
-      positioner.style.left = `${rect.left}px`;
+      positioner.style.top = `${top}px`;
+      positioner.style.left = `${left}px`;
       positioner.style.zIndex = '50';
     }
   }, [open, anchorEl, anchorOrigin, transformOrigin]);

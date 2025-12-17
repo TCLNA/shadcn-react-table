@@ -16,18 +16,21 @@ export interface DialogProps {
 
 export interface DialogTitleProps {
   children: ReactNode;
+  /** @deprecated sx prop is not supported in Base UI. Use className instead. */
   sx?: Record<string, any>;
   [key: string]: any;
 }
 
 export interface DialogContentProps {
   children: ReactNode;
+  /** @deprecated sx prop is not supported in Base UI. Use className instead. */
   sx?: Record<string, any>;
   [key: string]: any;
 }
 
 export interface DialogActionsProps {
   children: ReactNode;
+  /** @deprecated sx prop is not supported in Base UI. Use className instead. */
   sx?: Record<string, any>;
   [key: string]: any;
 }
