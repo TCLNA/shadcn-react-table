@@ -6,6 +6,33 @@ This guide covers the migration from Material UI (MUI) components to shadcn UI u
 
 The shadcn-react-table project is migrating from Material UI to shadcn UI design system. Instead of using Radix UI primitives (which shadcn typically uses), we're using Base UI components from `@base-ui/react` as the underlying primitives. This provides better compatibility with React Server Components and offers a lighter-weight alternative while maintaining the shadcn design aesthetic.
 
+## Current Migration Status
+
+### Completed
+- ✅ Base UI dependency added (`@base-ui/react` v1.0.0)
+- ✅ shadcn design tokens and CSS variables created
+- ✅ Base UI wrapper components created for:
+  - Menu and MenuItem
+  - Dialog, DialogTitle, DialogContent, DialogActions
+  - Tooltip
+  - Popover
+  - Box and ListItemIcon (utility components)
+- ✅ All menu components migrated (MRT_ColumnActionMenu, MRT_RowActionMenu, etc.)
+- ✅ Dialog/Modal components migrated (MRT_EditRowModal)
+- ✅ Tooltip components migrated (all button and header tooltips)
+- ✅ Popover components migrated (MRT_TableHeadCellFilterLabel)
+- ✅ Build configuration updated to externalize Base UI
+- ✅ TypeScript compilation successful
+
+### In Progress
+- 🔄 Runtime testing of interactive behaviors
+- 🔄 Test suite updates
+- 🔄 Type definition refinements
+
+### Not Started
+- ⏳ Select/Dropdown components (if additional migration needed)
+- ⏳ Additional styling refinements
+
 ## Breaking Changes
 
 ### Component Prop Changes
