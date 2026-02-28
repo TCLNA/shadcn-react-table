@@ -1,11 +1,17 @@
-import Box from '@mui/material/Box';
-import Divider, { type DividerProps } from '@mui/material/Divider';
+import { Separator } from '../ui/separator';
 import {
   type MRT_Header,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '../../lib/utils';
+
+// DividerProps type for compatibility
+interface DividerProps {
+  className?: string;
+  orientation?: 'horizontal' | 'vertical';
+  flexItem?: boolean;
+}
 
 export interface MRT_TableHeadCellResizeHandleProps<TData extends MRT_RowData>
   extends DividerProps {
@@ -38,7 +44,7 @@ export const MRT_TableHeadCellResizeHandle = <TData extends MRT_RowData>({
   const lr = column.columnDef.columnDefType === 'display' ? '4px' : '0';
 
   return (
-    <Box
+    <div
       className="Mui-TableHeadCell-ResizeHandle-Wrapper"
       onDoubleClick={() => {
         setColumnSizingInfo((old) => ({
@@ -57,40 +63,26 @@ export const MRT_TableHeadCellResizeHandle = <TData extends MRT_RowData>({
                 (getState().columnSizingInfo.deltaOffset ?? 0)
               }px)`
             : undefined,
-      }}
-      sx={(theme) => ({
-        '&:active > hr': {
-          backgroundColor: theme.palette.info.main,
-          opacity:
-            header.subHeaders.length || columnResizeMode === 'onEnd' ? 1 : 0,
-        },
         cursor: 'col-resize',
         left: columnResizeDirection === 'rtl' ? lr : undefined,
-        ml: columnResizeDirection === 'rtl' ? mx : undefined,
-        mr: columnResizeDirection === 'ltr' ? mx : undefined,
+        marginLeft: columnResizeDirection === 'rtl' ? mx : undefined,
+        marginRight: columnResizeDirection === 'ltr' ? mx : undefined,
         position: 'absolute',
-        px: '4px',
+        paddingLeft: '4px',
+        paddingRight: '4px',
         right: columnResizeDirection === 'ltr' ? lr : undefined,
-      })}
+      }}
     >
-      <Divider
-        className="Mui-TableHeadCell-ResizeHandle-Divider"
-        flexItem
+      <Separator
         orientation="vertical"
-        sx={(theme) => ({
-          borderRadius: '2px',
-          borderWidth: '2px',
-          height: '24px',
-          touchAction: 'none',
-          transform: 'translateX(4px)',
-          transition: column.getIsResizing()
-            ? undefined
-            : 'all 150ms ease-in-out',
-          userSelect: 'none',
-          zIndex: 4,
-          ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-        })}
+        className={cn(
+          "Mui-TableHeadCell-ResizeHandle-Divider",
+          "rounded-sm border-2 h-6 touch-none select-none z-[4]",
+          "translate-x-1",
+          column.getIsResizing() ? "" : "transition-all duration-150",
+          rest?.className
+        )}
       />
-    </Box>
+    </div>
   );
 };

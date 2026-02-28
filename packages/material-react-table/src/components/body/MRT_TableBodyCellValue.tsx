@@ -1,5 +1,4 @@
 import { type ReactNode, type RefObject } from 'react';
-import Box from '@mui/material/Box';
 import {
   type MRT_Cell,
   type MRT_RowData,
@@ -28,7 +27,7 @@ export const MRT_TableBodyCellValue = <TData extends MRT_RowData>({
     getState,
     options: {
       enableFilterMatchHighlighting,
-      mrtTheme: { matchHighlightColor },
+      mrtTheme: { matchHighlightColor: _matchHighlightColor },
     },
   } = table;
   const { column, row } = cell;
@@ -87,26 +86,13 @@ export const MRT_TableBodyCellValue = <TData extends MRT_RowData>({
       renderedCellValue = (
         <span aria-label={renderedCellValue as string} role="note">
           {chunks?.map(({ key, match, text }) => (
-            <Box
+            <span
               aria-hidden="true"
-              component="span"
               key={key}
-              sx={
-                match
-                  ? {
-                      backgroundColor: matchHighlightColor,
-                      borderRadius: '2px',
-                      color: (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? theme.palette.common.white
-                          : theme.palette.common.black,
-                      padding: '2px 1px',
-                    }
-                  : undefined
-              }
+              className={match ? 'bg-[hsl(var(--match-highlight))] rounded-sm px-0.5 py-0.5 text-foreground' : ''}
             >
               {text}
-            </Box>
+            </span>
           )) ?? renderedCellValue}
         </span>
       );

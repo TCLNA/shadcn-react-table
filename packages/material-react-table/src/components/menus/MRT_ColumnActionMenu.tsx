@@ -1,5 +1,8 @@
 import { type MouseEvent, useState } from 'react';
-import Menu, { type MenuProps } from '@mui/material/Menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+} from '../ui/dropdown-menu';
 import { MRT_ActionMenuItem } from './MRT_ActionMenuItem';
 import { MRT_FilterOptionMenu } from './MRT_FilterOptionMenu';
 import {
@@ -8,8 +11,7 @@ import {
   type MRT_TableInstance,
 } from '../../types';
 
-export interface MRT_ColumnActionMenuProps<TData extends MRT_RowData>
-  extends Partial<MenuProps> {
+export interface MRT_ColumnActionMenuProps<TData extends MRT_RowData> {
   anchorEl: HTMLElement | null;
   header: MRT_Header<TData>;
   setAnchorEl: (anchorEl: HTMLElement | null) => void;
@@ -21,7 +23,6 @@ export const MRT_ColumnActionMenu = <TData extends MRT_RowData>({
   header,
   setAnchorEl,
   table,
-  ...rest
 }: MRT_ColumnActionMenuProps<TData>) => {
   const {
     getAllLeafColumns,
@@ -49,7 +50,6 @@ export const MRT_ColumnActionMenu = <TData extends MRT_RowData>({
         VisibilityOffIcon,
       },
       localization,
-      mrtTheme: { menuBackgroundColor },
       renderColumnActionsMenuItems,
     },
     refs: { filterInputRefs },
@@ -60,7 +60,7 @@ export const MRT_ColumnActionMenu = <TData extends MRT_RowData>({
   } = table;
   const { column } = header;
   const { columnDef } = column;
-  const { columnSizing, columnVisibility, density, showColumnFilters } =
+  const { columnSizing, columnVisibility, density: _density, showColumnFilters } =
     getState();
   const columnFilterValue = column.getFilterValue();
 
@@ -211,7 +211,7 @@ export const MRT_ColumnActionMenu = <TData extends MRT_RowData>({
               )}
               onClick={
                 showColumnFilters
-                  ? handleOpenFilterModeMenu
+                  ? (handleOpenFilterModeMenu as any)
                   : handleFilterByColumn
               }
               onOpenSubMenu={
@@ -319,32 +319,26 @@ export const MRT_ColumnActionMenu = <TData extends MRT_RowData>({
   ].filter(Boolean);
 
   return (
-    <Menu
-      MenuListProps={{
-        dense: density === 'compact',
-        sx: {
-          backgroundColor: menuBackgroundColor,
-        },
-      }}
-      anchorEl={anchorEl}
-      disableScrollLock
-      onClose={() => setAnchorEl(null)}
-      open={!!anchorEl}
-      {...rest}
-    >
-      {columnDef.renderColumnActionsMenuItems?.({
-        closeMenu: () => setAnchorEl(null),
-        column,
-        internalColumnMenuItems,
-        table,
-      }) ??
-        renderColumnActionsMenuItems?.({
+    <DropdownMenu open={!!anchorEl} onOpenChange={(open) => !open && setAnchorEl(null)}>
+      <DropdownMenuContent 
+        className="min-w-[200px]"
+        align="start"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        {columnDef.renderColumnActionsMenuItems?.({
           closeMenu: () => setAnchorEl(null),
           column,
           internalColumnMenuItems,
           table,
         }) ??
-        internalColumnMenuItems}
-    </Menu>
+          renderColumnActionsMenuItems?.({
+            closeMenu: () => setAnchorEl(null),
+            column,
+            internalColumnMenuItems,
+            table,
+          }) ??
+          internalColumnMenuItems}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

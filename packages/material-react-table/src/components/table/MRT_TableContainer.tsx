@@ -1,24 +1,26 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
-import TableContainer, {
-  type TableContainerProps,
-} from '@mui/material/TableContainer';
 import { MRT_Table } from './MRT_Table';
 import { MRT_TableLoadingOverlay } from './MRT_TableLoadingOverlay';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_CellActionMenu } from '../menus/MRT_CellActionMenu';
 import { MRT_EditRowModal } from '../modals/MRT_EditRowModal';
+import { cn } from '../../lib/utils';
 
 const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export interface MRT_TableContainerProps<TData extends MRT_RowData>
-  extends TableContainerProps {
+  extends React.HTMLAttributes<HTMLDivElement> {
   table: MRT_TableInstance<TData>;
+  maxHeight?: string | number;
 }
 
 export const MRT_TableContainer = <TData extends MRT_RowData>({
   table,
+  maxHeight,
+  className,
+  style,
   ...rest
 }: MRT_TableContainerProps<TData>) => {
   const {
@@ -70,35 +72,36 @@ export const MRT_TableContainer = <TData extends MRT_RowData>({
   const createModalOpen = createDisplayMode === 'modal' && creatingRow;
   const editModalOpen = editDisplayMode === 'modal' && editingRow;
 
+  // Calculate maxHeight based on fullscreen and sticky header settings
+  const computedMaxHeight = isFullScreen
+    ? `calc(100vh - ${totalToolbarHeight}px)`
+    : enableStickyHeader
+    ? `clamp(350px, calc(100vh - ${totalToolbarHeight}px), 9999px)`
+    : maxHeight;
+
   return (
-    <TableContainer
+    <div
       aria-busy={loading}
       aria-describedby={loading ? 'mrt-progress' : undefined}
       {...tableContainerProps}
       ref={(node: HTMLDivElement) => {
         if (node) {
           tableContainerRef.current = node;
-          if (tableContainerProps?.ref) {
-            //@ts-expect-error
-            tableContainerProps.ref.current = node;
+          if ((tableContainerProps as any)?.ref) {
+            (tableContainerProps as any).ref.current = node;
           }
         }
       }}
+      className={cn(
+        'relative w-full max-w-full overflow-auto',
+        className,
+        tableContainerProps?.className
+      )}
       style={{
-        maxHeight: isFullScreen
-          ? `calc(100vh - ${totalToolbarHeight}px)`
-          : undefined,
+        maxHeight: computedMaxHeight,
+        ...style,
         ...tableContainerProps?.style,
       }}
-      sx={(theme) => ({
-        maxHeight: enableStickyHeader
-          ? `clamp(350px, calc(100vh - ${totalToolbarHeight}px), 9999px)`
-          : undefined,
-        maxWidth: '100%',
-        overflow: 'auto',
-        position: 'relative',
-        ...(parseFromValuesOrFunc(tableContainerProps?.sx, theme) as any),
-      })}
     >
       {loading ? <MRT_TableLoadingOverlay table={table} /> : null}
       <MRT_Table table={table} />
@@ -106,6 +109,6 @@ export const MRT_TableContainer = <TData extends MRT_RowData>({
         <MRT_EditRowModal open table={table} />
       )}
       {enableCellActions && actionCell && <MRT_CellActionMenu table={table} />}
-    </TableContainer>
+    </div>
   );
 };

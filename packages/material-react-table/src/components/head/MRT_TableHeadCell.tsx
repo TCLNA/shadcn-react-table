@@ -1,8 +1,5 @@
 import { type DragEvent, useMemo, useCallback } from 'react';
-import Box from '@mui/material/Box';
-import TableCell, { type TableCellProps } from '@mui/material/TableCell';
-import { useTheme } from '@mui/material/styles';
-import { type Theme } from '@mui/material/styles';
+import { TableHead } from '../ui/table';
 import { MRT_TableHeadCellColumnActionsButton } from './MRT_TableHeadCellColumnActionsButton';
 import { MRT_TableHeadCellFilterContainer } from './MRT_TableHeadCellFilterContainer';
 import { MRT_TableHeadCellFilterLabel } from './MRT_TableHeadCellFilterLabel';
@@ -15,12 +12,12 @@ import {
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { getCommonMRTCellStyles } from '../../utils/style.utils';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { cellKeyboardShortcuts } from '../../utils/cell.utils';
+import { cn } from '../../lib/utils';
 
 export interface MRT_TableHeadCellProps<TData extends MRT_RowData>
-  extends TableCellProps {
+  extends React.ThHTMLAttributes<HTMLTableCellElement> {
   columnVirtualizer?: MRT_ColumnVirtualizer;
   header: MRT_Header<TData>;
   staticColumnIndex?: number;
@@ -34,7 +31,6 @@ export const MRT_TableHeadCell = <TData extends MRT_RowData>({
   table,
   ...rest
 }: MRT_TableHeadCellProps<TData>) => {
-  const theme = useTheme();
   const {
     getState,
     options: {
@@ -51,6 +47,7 @@ export const MRT_TableHeadCell = <TData extends MRT_RowData>({
       layoutMode,
       mrtTheme: { draggingBorderColor },
       muiTableHeadCellProps,
+      tableHeadCellProps,
     },
     refs: { tableHeadCellRefs },
     setHoveredColumn,
@@ -68,8 +65,8 @@ export const MRT_TableHeadCell = <TData extends MRT_RowData>({
   const { columnDefType } = columnDef;
 
   const tableCellProps = {
-    ...parseFromValuesOrFunc(muiTableHeadCellProps, { column, table }),
-    ...parseFromValuesOrFunc(columnDef.muiTableHeadCellProps, {
+    ...parseFromValuesOrFunc(tableHeadCellProps ?? muiTableHeadCellProps, { column, table }),
+    ...parseFromValuesOrFunc(columnDef.tableHeadCellProps ?? columnDef.muiTableHeadCellProps, {
       column,
       table,
     }),
@@ -108,29 +105,24 @@ export const MRT_TableHeadCell = <TData extends MRT_RowData>({
       columnResizeMode === 'onChange' &&
       !header.subHeaders.length;
 
-    const borderStyle = showResizeBorder
-      ? `2px solid ${draggingBorderColor} !important`
-      : draggingColumn?.id === column.id
-        ? `1px dashed ${theme.palette.grey[500]}`
-        : hoveredColumn?.id === column.id
-          ? `2px dashed ${draggingBorderColor}`
-          : undefined;
-
+    // draggingBorderColor used by className-based border styling below
+    
     if (showResizeBorder) {
       return columnResizeDirection === 'ltr'
-        ? { borderRight: borderStyle }
-        : { borderLeft: borderStyle };
+        ? 'border-r-2 border-r-primary'
+        : 'border-l-2 border-l-primary';
     }
-    const draggingBorders = borderStyle
-      ? {
-          borderLeft: borderStyle,
-          borderRight: borderStyle,
-          borderTop: borderStyle,
-        }
-      : undefined;
-
-    return draggingBorders;
-  }, [draggingColumn, hoveredColumn, columnSizingInfo.isResizingColumn]);
+    
+    if (draggingColumn?.id === column.id) {
+      return 'border-x border-t border-dashed border-muted-foreground';
+    }
+    
+    if (hoveredColumn?.id === column.id) {
+      return 'border-x-2 border-t-2 border-dashed border-primary';
+    }
+    
+    return '';
+  }, [draggingColumn, hoveredColumn, columnSizingInfo.isResizingColumn, columnResizeDirection, draggingBorderColor]);
 
   const handleDragEnter = (_e: DragEvent) => {
     if (enableGrouping && hoveredColumn?.id === 'drop-zone') {
@@ -180,15 +172,46 @@ export const MRT_TableHeadCell = <TData extends MRT_RowData>({
       table,
     }) ?? columnDef.header;
 
+  // Calculate padding based on density
+  const getPaddingClasses = () => {
+    if (density === 'compact') {
+      return 'p-2';
+    } else if (density === 'comfortable') {
+      return columnDefType === 'display' ? 'p-3' : 'p-4';
+    } else {
+      return columnDefType === 'display' ? 'px-5 py-4' : 'p-6';
+    }
+  };
+
+  const getPaddingBottomClasses = () => {
+    if (columnDefType === 'display') {
+      return 'pb-0';
+    } else if (showColumnFilters || density === 'compact') {
+      return 'pb-1.5';
+    } else {
+      return 'pb-2.5';
+    }
+  };
+
+  const getPaddingTopClasses = () => {
+    if (columnDefType === 'group' || density === 'compact') {
+      return 'pt-1';
+    } else if (density === 'comfortable') {
+      return 'pt-3';
+    } else {
+      return 'pt-5';
+    }
+  };
+
+  const getAlignmentClass = () => {
+    if (columnDefType === 'group') {
+      return 'text-center';
+    }
+    return 'text-left';
+  };
+
   return (
-    <TableCell
-      align={
-        columnDefType === 'group'
-          ? 'center'
-          : theme.direction === 'rtl'
-            ? 'right'
-            : 'left'
-      }
+    <TableHead
       aria-sort={
         column.getIsSorted()
           ? column.getIsSorted() === 'asc'
@@ -207,59 +230,29 @@ export const MRT_TableHeadCell = <TData extends MRT_RowData>({
       tabIndex={enableKeyboardShortcuts ? 0 : undefined}
       {...tableCellProps}
       onKeyDown={handleKeyDown}
-      sx={(theme: Theme) => ({
-        '& :hover': {
-          '.MuiButtonBase-root': {
-            opacity: 1,
-          },
-        },
-        flexDirection: layoutMode?.startsWith('grid') ? 'column' : undefined,
-        fontWeight: 'bold',
-        overflow: 'visible',
-        p:
-          density === 'compact'
-            ? '0.5rem'
-            : density === 'comfortable'
-              ? columnDefType === 'display'
-                ? '0.75rem'
-                : '1rem'
-              : columnDefType === 'display'
-                ? '1rem 1.25rem'
-                : '1.5rem',
-        pb:
-          columnDefType === 'display'
-            ? 0
-            : showColumnFilters || density === 'compact'
-              ? '0.4rem'
-              : '0.6rem',
-        pt:
-          columnDefType === 'group' || density === 'compact'
-            ? '0.25rem'
-            : density === 'comfortable'
-              ? '.75rem'
-              : '1.25rem',
-        userSelect: enableMultiSort && column.getCanSort() ? 'none' : undefined,
-        verticalAlign: 'top',
-        ...getCommonMRTCellStyles({
-          column,
-          header,
-          table,
-          tableCellProps,
-          theme,
-        }),
-        ...draggingBorders,
-      })}
+      className={cn(
+        'font-bold overflow-visible align-top',
+        getPaddingClasses(),
+        getPaddingBottomClasses(),
+        getPaddingTopClasses(),
+        getAlignmentClass(),
+        draggingBorders,
+        layoutMode?.startsWith('grid') && 'flex flex-col',
+        enableMultiSort && column.getCanSort() && 'select-none',
+        'hover:[&_.MuiButtonBase-root]:opacity-100',
+        tableCellProps.className
+      )}
+      style={{
+        ...tableCellProps.style,
+      }}
     >
       {header.isPlaceholder
         ? null
         : (tableCellProps.children ?? (
-            <Box
-              className="Mui-TableHeadCell-Content"
-              sx={{
-                alignItems: 'center',
-                display: 'flex',
-                flexDirection:
-                  tableCellProps?.align === 'right' ? 'row-reverse' : 'row',
+            <div
+              className="Mui-TableHeadCell-Content flex items-center relative w-full"
+              style={{
+                flexDirection: tableCellProps?.align === 'right' ? 'row-reverse' : 'row',
                 justifyContent:
                   columnDefType === 'group' ||
                   tableCellProps?.align === 'center'
@@ -267,59 +260,42 @@ export const MRT_TableHeadCell = <TData extends MRT_RowData>({
                     : column.getCanResize()
                       ? 'space-between'
                       : 'flex-start',
-                position: 'relative',
-                width: '100%',
               }}
             >
-              <Box
-                className="Mui-TableHeadCell-Content-Labels"
+              <div
+                className={cn(
+                  "Mui-TableHeadCell-Content-Labels flex items-center",
+                  column.getCanSort() && columnDefType !== 'group' && 'cursor-pointer',
+                  columnDefType === 'data' && 'overflow-hidden'
+                )}
                 onClick={column.getToggleSortingHandler()}
-                sx={{
-                  alignItems: 'center',
-                  cursor:
-                    column.getCanSort() && columnDefType !== 'group'
-                      ? 'pointer'
-                      : undefined,
-                  display: 'flex',
-                  flexDirection:
-                    tableCellProps?.align === 'right' ? 'row-reverse' : 'row',
-                  overflow: columnDefType === 'data' ? 'hidden' : undefined,
-                  pl:
-                    tableCellProps?.align === 'center'
-                      ? `${headerPL}rem`
-                      : undefined,
+                style={{
+                  flexDirection: tableCellProps?.align === 'right' ? 'row-reverse' : 'row',
+                  paddingLeft: tableCellProps?.align === 'center' ? `${headerPL}rem` : undefined,
                 }}
               >
-                <Box
-                  className="Mui-TableHeadCell-Content-Wrapper"
-                  sx={{
-                    '&:hover': {
-                      textOverflow: 'clip',
-                    },
+                <div
+                  className={cn(
+                    "Mui-TableHeadCell-Content-Wrapper text-ellipsis hover:overflow-clip",
+                    columnDefType === 'data' && 'overflow-hidden',
+                    (columnDef.header?.length ?? 0) < 20 ? 'whitespace-nowrap' : 'whitespace-normal'
+                  )}
+                  style={{
                     minWidth: `${Math.min(columnDef.header?.length ?? 0, 4)}ch`,
-                    overflow: columnDefType === 'data' ? 'hidden' : undefined,
-                    textOverflow: 'ellipsis',
-                    whiteSpace:
-                      (columnDef.header?.length ?? 0) < 20
-                        ? 'nowrap'
-                        : 'normal',
                   }}
                 >
                   {HeaderElement}
-                </Box>
+                </div>
                 {column.getCanFilter() && (
                   <MRT_TableHeadCellFilterLabel header={header} table={table} />
                 )}
                 {column.getCanSort() && (
                   <MRT_TableHeadCellSortLabel header={header} table={table} />
                 )}
-              </Box>
+              </div>
               {columnDefType !== 'group' && (
-                <Box
-                  className="Mui-TableHeadCell-Content-Actions"
-                  sx={{
-                    whiteSpace: 'nowrap',
-                  }}
+                <div
+                  className="Mui-TableHeadCell-Content-Actions whitespace-nowrap"
                 >
                   {showDragHandle && (
                     <MRT_TableHeadCellGrabHandle
@@ -336,16 +312,16 @@ export const MRT_TableHeadCell = <TData extends MRT_RowData>({
                       table={table}
                     />
                   )}
-                </Box>
+                </div>
               )}
               {column.getCanResize() && (
                 <MRT_TableHeadCellResizeHandle header={header} table={table} />
               )}
-            </Box>
+            </div>
           ))}
       {columnFilterDisplayMode === 'subheader' && column.getCanFilter() && (
         <MRT_TableHeadCellFilterContainer header={header} table={table} />
       )}
-    </TableCell>
+    </TableHead>
   );
 };

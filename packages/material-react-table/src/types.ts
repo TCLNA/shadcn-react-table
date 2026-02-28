@@ -28,7 +28,7 @@ import {
   type RowSelectionState,
   type SortingFn,
   type SortingState,
-  type Table,
+  type Table as TanStackTable,
   type TableOptions,
   type TableState,
   type Updater,
@@ -39,36 +39,83 @@ import {
   type Virtualizer,
   type VirtualizerOptions,
 } from '@tanstack/react-virtual';
-import { type AlertProps } from '@mui/material/Alert';
-import { type AutocompleteProps } from '@mui/material/Autocomplete';
-import { type BoxProps } from '@mui/material/Box';
-import { type ButtonProps } from '@mui/material/Button';
-import { type CheckboxProps } from '@mui/material/Checkbox';
-import { type ChipProps } from '@mui/material/Chip';
-import { type CircularProgressProps } from '@mui/material/CircularProgress';
-import { type DialogProps } from '@mui/material/Dialog';
-import { type IconButtonProps } from '@mui/material/IconButton';
-import { type LinearProgressProps } from '@mui/material/LinearProgress';
-import { type PaginationProps } from '@mui/material/Pagination';
-import { type PaperProps } from '@mui/material/Paper';
-import { type RadioProps } from '@mui/material/Radio';
-import { type SelectProps } from '@mui/material/Select';
-import { type SkeletonProps } from '@mui/material/Skeleton';
-import { type SliderProps } from '@mui/material/Slider';
-import { type TableProps } from '@mui/material/Table';
-import { type TableBodyProps } from '@mui/material/TableBody';
-import { type TableCellProps } from '@mui/material/TableCell';
-import { type TableContainerProps } from '@mui/material/TableContainer';
-import { type TableFooterProps } from '@mui/material/TableFooter';
-import { type TableHeadProps } from '@mui/material/TableHead';
-import { type TableRowProps } from '@mui/material/TableRow';
-import { type TextFieldProps } from '@mui/material/TextField';
-import { type Theme } from '@mui/material/styles';
-import {
-  type DatePickerProps,
-  type DateTimePickerProps,
-  type TimePickerProps,
-} from '@mui/x-date-pickers';
+// shadcn/ui component prop types
+import { type ButtonProps } from '@/components/ui/button';
+import { type Alert } from '@/components/ui/alert';
+import { type Calendar } from '@/components/ui/calendar';
+import * as SelectPrimitive from '@radix-ui/react-select';
+import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import * as ProgressPrimitive from '@radix-ui/react-progress';
+
+// Extract component prop types for shadcn/ui components
+export type AlertProps = React.ComponentPropsWithoutRef<typeof Alert>;
+export type CheckboxProps = React.ComponentPropsWithoutRef<
+  typeof CheckboxPrimitive.Root
+>;
+export type DialogProps = React.ComponentPropsWithoutRef<
+  typeof DialogPrimitive.Root
+>;
+export type InputProps = React.ComponentProps<'input'>;
+export type SelectProps = React.ComponentPropsWithoutRef<
+  typeof SelectPrimitive.Root
+>;
+export type ProgressProps = React.ComponentPropsWithoutRef<
+  typeof ProgressPrimitive.Root
+>;
+export type SkeletonProps = React.HTMLAttributes<HTMLDivElement>;
+export type SliderProps = React.HTMLAttributes<HTMLDivElement>;
+export type TableProps = React.HTMLAttributes<HTMLTableElement>;
+export type TableBodyProps = React.HTMLAttributes<HTMLTableSectionElement>;
+export type TableCellProps = React.TdHTMLAttributes<HTMLTableCellElement>;
+export type TableContainerProps = React.HTMLAttributes<HTMLDivElement>;
+export type TableFooterProps = React.HTMLAttributes<HTMLTableSectionElement>;
+export type TableHeadProps = React.HTMLAttributes<HTMLTableSectionElement>;
+export type TableHeaderProps = React.HTMLAttributes<HTMLTableSectionElement>;
+export type TableRowProps = React.HTMLAttributes<HTMLTableRowElement>;
+export type DatePickerProps = React.ComponentPropsWithoutRef<typeof Calendar>;
+export type DateTimePickerProps = React.ComponentPropsWithoutRef<typeof Calendar>;
+export type TimePickerProps = React.HTMLAttributes<HTMLDivElement>;
+
+// TextField equivalent (Input component)
+export type TextFieldProps = InputProps;
+
+// IconButton equivalent (Button with variant="ghost" and size="icon")
+export type IconButtonProps = ButtonProps;
+
+// LinearProgress equivalent (Progress component)
+export type LinearProgressProps = ProgressProps;
+
+// CircularProgress equivalent (Progress component or custom spinner)
+export type CircularProgressProps = ProgressProps & { Component?: ReactNode };
+
+// Pagination equivalent (custom pagination component)
+export type PaginationProps = React.HTMLAttributes<HTMLDivElement>;
+
+// Box equivalent (div with className)
+export type BoxProps = React.HTMLAttributes<HTMLDivElement>;
+
+// Paper equivalent (div with className)
+export type PaperProps = React.HTMLAttributes<HTMLDivElement>;
+
+// Chip equivalent (span or div with className)
+export type ChipProps = React.HTMLAttributes<HTMLSpanElement>;
+
+// Radio equivalent (uses Checkbox primitive)
+export type RadioProps = CheckboxProps;
+
+// Autocomplete equivalent (Command component)
+export type AutocompleteProps<T = any, Multiple = any, DisableClearable = any, FreeSolo = any> = {
+  options?: T[];
+  value?: Multiple extends true ? T[] : T | null;
+  onChange?: (value: Multiple extends true ? T[] : T | null) => void;
+  multiple?: Multiple;
+  disableClearable?: DisableClearable;
+  freeSolo?: FreeSolo;
+  renderInput?: (params: any) => React.ReactNode;
+  getOptionLabel?: (option: T) => string;
+  isOptionEqualToValue?: (option: T, value: T) => boolean;
+} & React.HTMLAttributes<HTMLDivElement>;
 import { type MRT_AggregationFns } from './fns/aggregationFns';
 import { type MRT_FilterFns } from './fns/filterFns';
 import { type MRT_SortingFns } from './fns/sortingFns';
@@ -262,7 +309,7 @@ export interface MRT_RowModel<TData extends MRT_RowData> {
 }
 
 export type MRT_TableInstance<TData extends MRT_RowData> = Omit<
-  Table<TData>,
+  TanStackTable<TData>,
   | 'getAllColumns'
   | 'getAllFlatColumns'
   | 'getAllLeafColumns'
@@ -552,18 +599,56 @@ export interface MRT_ColumnDef<TData extends MRT_RowData, TValue = unknown>
    * @default gets set to the same value as `accessorKey` by default
    */
   id?: LiteralUnion<string & keyof TData>;
+  /**
+   * Props to pass to the column actions button component.
+   */
+  columnActionsButtonProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => IconButtonProps)
+    | IconButtonProps;
+  /**
+   * @deprecated Use `columnActionsButtonProps` instead. This prop will be removed in a future version.
+   */
   muiColumnActionsButtonProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => IconButtonProps)
     | IconButtonProps;
+  /**
+   * Props to pass to the column drag handle component.
+   */
+  columnDragHandleProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => IconButtonProps)
+    | IconButtonProps;
+  /**
+   * @deprecated Use `columnDragHandleProps` instead. This prop will be removed in a future version.
+   */
   muiColumnDragHandleProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => IconButtonProps)
     | IconButtonProps;
+  /**
+   * Props to pass to the copy button component.
+   */
+  copyButtonProps?:
+    | ((props: {
+        cell: MRT_Cell<TData, TValue>;
+        column: MRT_Column<TData>;
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => ButtonProps)
+    | ButtonProps;
+  /**
+   * @deprecated Use `copyButtonProps` instead. This prop will be removed in a future version.
+   */
   muiCopyButtonProps?:
     | ((props: {
         cell: MRT_Cell<TData, TValue>;
@@ -572,6 +657,20 @@ export interface MRT_ColumnDef<TData extends MRT_RowData, TValue = unknown>
         table: MRT_TableInstance<TData>;
       }) => ButtonProps)
     | ButtonProps;
+  /**
+   * Props to pass to the edit text field component.
+   */
+  editTextFieldProps?:
+    | ((props: {
+        cell: MRT_Cell<TData, TValue>;
+        column: MRT_Column<TData>;
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TextFieldProps)
+    | TextFieldProps;
+  /**
+   * @deprecated Use `editTextFieldProps` instead. This prop will be removed in a future version.
+   */
   muiEditTextFieldProps?:
     | ((props: {
         cell: MRT_Cell<TData, TValue>;
@@ -580,38 +679,113 @@ export interface MRT_ColumnDef<TData extends MRT_RowData, TValue = unknown>
         table: MRT_TableInstance<TData>;
       }) => TextFieldProps)
     | TextFieldProps;
+  /**
+   * Props to pass to the filter autocomplete component.
+   */
+  filterAutocompleteProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => AutocompleteProps<any, any, any, any>)
+    | AutocompleteProps<any, any, any, any>;
+  /**
+   * @deprecated Use `filterAutocompleteProps` instead. This prop will be removed in a future version.
+   */
   muiFilterAutocompleteProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => AutocompleteProps<any, any, any, any>)
     | AutocompleteProps<any, any, any, any>;
+  /**
+   * Props to pass to the filter checkbox component.
+   */
+  filterCheckboxProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => CheckboxProps)
+    | CheckboxProps;
+  /**
+   * @deprecated Use `filterCheckboxProps` instead. This prop will be removed in a future version.
+   */
   muiFilterCheckboxProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => CheckboxProps)
     | CheckboxProps;
+  /**
+   * Props to pass to the filter date picker component.
+   */
+  filterDatePickerProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        rangeFilterIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => DatePickerProps)
+    | DatePickerProps;
+  /**
+   * @deprecated Use `filterDatePickerProps` instead. This prop will be removed in a future version.
+   */
   muiFilterDatePickerProps?:
     | ((props: {
         column: MRT_Column<TData>;
         rangeFilterIndex?: number;
         table: MRT_TableInstance<TData>;
-      }) => DatePickerProps<never>)
-    | DatePickerProps<never>;
+      }) => DatePickerProps)
+    | DatePickerProps;
+  /**
+   * Props to pass to the filter date time picker component.
+   */
+  filterDateTimePickerProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        rangeFilterIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => DateTimePickerProps)
+    | DateTimePickerProps;
+  /**
+   * @deprecated Use `filterDateTimePickerProps` instead. This prop will be removed in a future version.
+   */
   muiFilterDateTimePickerProps?:
     | ((props: {
         column: MRT_Column<TData>;
         rangeFilterIndex?: number;
         table: MRT_TableInstance<TData>;
-      }) => DateTimePickerProps<never>)
-    | DateTimePickerProps<never>;
+      }) => DateTimePickerProps)
+    | DateTimePickerProps;
+  /**
+   * Props to pass to the filter slider component.
+   */
+  filterSliderProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => SliderProps)
+    | SliderProps;
+  /**
+   * @deprecated Use `filterSliderProps` instead. This prop will be removed in a future version.
+   */
   muiFilterSliderProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => SliderProps)
     | SliderProps;
+  /**
+   * Props to pass to the filter text field component.
+   */
+  filterTextFieldProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        rangeFilterIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => TextFieldProps)
+    | TextFieldProps;
+  /**
+   * @deprecated Use `filterTextFieldProps` instead. This prop will be removed in a future version.
+   */
   muiFilterTextFieldProps?:
     | ((props: {
         column: MRT_Column<TData>;
@@ -619,13 +793,40 @@ export interface MRT_ColumnDef<TData extends MRT_RowData, TValue = unknown>
         table: MRT_TableInstance<TData>;
       }) => TextFieldProps)
     | TextFieldProps;
+  /**
+   * Props to pass to the filter time picker component.
+   */
+  filterTimePickerProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        rangeFilterIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => TimePickerProps)
+    | TimePickerProps;
+  /**
+   * @deprecated Use `filterTimePickerProps` instead. This prop will be removed in a future version.
+   */
   muiFilterTimePickerProps?:
     | ((props: {
         column: MRT_Column<TData>;
         rangeFilterIndex?: number;
         table: MRT_TableInstance<TData>;
-      }) => TimePickerProps<never>)
-    | TimePickerProps<never>;
+      }) => TimePickerProps)
+    | TimePickerProps;
+  /**
+   * Props to pass to the table body cell component.
+   */
+  tableBodyCellProps?:
+    | ((props: {
+        cell: MRT_Cell<TData, TValue>;
+        column: MRT_Column<TData>;
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TableCellProps)
+    | TableCellProps;
+  /**
+   * @deprecated Use `tableBodyCellProps` instead. This prop will be removed in a future version.
+   */
   muiTableBodyCellProps?:
     | ((props: {
         cell: MRT_Cell<TData, TValue>;
@@ -634,12 +835,36 @@ export interface MRT_ColumnDef<TData extends MRT_RowData, TValue = unknown>
         table: MRT_TableInstance<TData>;
       }) => TableCellProps)
     | TableCellProps;
+  /**
+   * Props to pass to the table footer cell component.
+   */
+  tableFooterCellProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TableCellProps)
+    | TableCellProps;
+  /**
+   * @deprecated Use `tableFooterCellProps` instead. This prop will be removed in a future version.
+   */
   muiTableFooterCellProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => TableCellProps)
     | TableCellProps;
+  /**
+   * Props to pass to the table head cell component.
+   */
+  tableHeadCellProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TableCellProps)
+    | TableCellProps;
+  /**
+   * @deprecated Use `tableHeadCellProps` instead. This prop will be removed in a future version.
+   */
   muiTableHeadCellProps?:
     | ((props: {
         column: MRT_Column<TData>;
@@ -915,27 +1140,89 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
    * @link https://www.material-react-table.com/docs/guides/memoize-components
    */
   memoMode?: 'cells' | 'rows' | 'table-body';
-  mrtTheme?: ((theme: Theme) => Partial<MRT_Theme>) | Partial<MRT_Theme>;
+  /**
+   * Customize the table theme colors and styling.
+   * Can be a partial MRT_Theme object or a function that returns one.
+   */
+  mrtTheme?: Partial<MRT_Theme> | (() => Partial<MRT_Theme>);
+  /**
+   * Props to pass to the bottom toolbar component.
+   */
+  bottomToolbarProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => BoxProps)
+    | BoxProps;
+  /**
+   * @deprecated Use `bottomToolbarProps` instead. This prop will be removed in a future version.
+   */
   muiBottomToolbarProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => BoxProps)
     | BoxProps;
+  /**
+   * Props to pass to the circular progress component.
+   */
+  circularProgressProps?:
+    | ((props: {
+        table: MRT_TableInstance<TData>;
+      }) => CircularProgressProps & { Component?: ReactNode })
+    | (CircularProgressProps & { Component?: ReactNode });
+  /**
+   * @deprecated Use `circularProgressProps` instead. This prop will be removed in a future version.
+   */
   muiCircularProgressProps?:
     | ((props: {
         table: MRT_TableInstance<TData>;
       }) => CircularProgressProps & { Component?: ReactNode })
     | (CircularProgressProps & { Component?: ReactNode });
+  /**
+   * Props to pass to the column actions button component.
+   */
+  columnActionsButtonProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => IconButtonProps)
+    | IconButtonProps;
+  /**
+   * @deprecated Use `columnActionsButtonProps` instead. This prop will be removed in a future version.
+   */
   muiColumnActionsButtonProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => IconButtonProps)
     | IconButtonProps;
+  /**
+   * Props to pass to the column drag handle component.
+   */
+  columnDragHandleProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => IconButtonProps)
+    | IconButtonProps;
+  /**
+   * @deprecated Use `columnDragHandleProps` instead. This prop will be removed in a future version.
+   */
   muiColumnDragHandleProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => IconButtonProps)
     | IconButtonProps;
+  /**
+   * Props to pass to the copy button component.
+   */
+  copyButtonProps?:
+    | ((props: {
+        cell: MRT_Cell<TData>;
+        column: MRT_Column<TData>;
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => ButtonProps)
+    | ButtonProps;
+  /**
+   * @deprecated Use `copyButtonProps` instead. This prop will be removed in a future version.
+   */
   muiCopyButtonProps?:
     | ((props: {
         cell: MRT_Cell<TData>;
@@ -944,24 +1231,74 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
         table: MRT_TableInstance<TData>;
       }) => ButtonProps)
     | ButtonProps;
+  /**
+   * Props to pass to the create row modal component.
+   */
+  createRowModalProps?:
+    | ((props: {
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => DialogProps)
+    | DialogProps;
+  /**
+   * @deprecated Use `createRowModalProps` instead. This prop will be removed in a future version.
+   */
   muiCreateRowModalProps?:
     | ((props: {
         row: MRT_Row<TData>;
         table: MRT_TableInstance<TData>;
       }) => DialogProps)
     | DialogProps;
+  /**
+   * Props to pass to the detail panel component.
+   */
+  detailPanelProps?:
+    | ((props: {
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TableCellProps)
+    | TableCellProps;
+  /**
+   * @deprecated Use `detailPanelProps` instead. This prop will be removed in a future version.
+   */
   muiDetailPanelProps?:
     | ((props: {
         row: MRT_Row<TData>;
         table: MRT_TableInstance<TData>;
       }) => TableCellProps)
     | TableCellProps;
+  /**
+   * Props to pass to the edit row dialog component.
+   */
+  editRowDialogProps?:
+    | ((props: {
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => DialogProps)
+    | DialogProps;
+  /**
+   * @deprecated Use `editRowDialogProps` instead. This prop will be removed in a future version.
+   */
   muiEditRowDialogProps?:
     | ((props: {
         row: MRT_Row<TData>;
         table: MRT_TableInstance<TData>;
       }) => DialogProps)
     | DialogProps;
+  /**
+   * Props to pass to the edit text field component.
+   */
+  editTextFieldProps?:
+    | ((props: {
+        cell: MRT_Cell<TData>;
+        column: MRT_Column<TData>;
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TextFieldProps)
+    | TextFieldProps;
+  /**
+   * @deprecated Use `editTextFieldProps` instead. This prop will be removed in a future version.
+   */
   muiEditTextFieldProps?:
     | ((props: {
         cell: MRT_Cell<TData>;
@@ -970,9 +1307,31 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
         table: MRT_TableInstance<TData>;
       }) => TextFieldProps)
     | TextFieldProps;
+  /**
+   * Props to pass to the expand all button component.
+   */
+  expandAllButtonProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => IconButtonProps)
+    | IconButtonProps;
+  /**
+   * @deprecated Use `expandAllButtonProps` instead. This prop will be removed in a future version.
+   */
   muiExpandAllButtonProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => IconButtonProps)
     | IconButtonProps;
+  /**
+   * Props to pass to the expand button component.
+   */
+  expandButtonProps?:
+    | ((props: {
+        row: MRT_Row<TData>;
+        staticRowIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => IconButtonProps)
+    | IconButtonProps;
+  /**
+   * @deprecated Use `expandButtonProps` instead. This prop will be removed in a future version.
+   */
   muiExpandButtonProps?:
     | ((props: {
         row: MRT_Row<TData>;
@@ -980,38 +1339,113 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
         table: MRT_TableInstance<TData>;
       }) => IconButtonProps)
     | IconButtonProps;
+  /**
+   * Props to pass to the filter autocomplete component.
+   */
+  filterAutocompleteProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => AutocompleteProps<any, any, any, any>)
+    | AutocompleteProps<any, any, any, any>;
+  /**
+   * @deprecated Use `filterAutocompleteProps` instead. This prop will be removed in a future version.
+   */
   muiFilterAutocompleteProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => AutocompleteProps<any, any, any, any>)
     | AutocompleteProps<any, any, any, any>;
+  /**
+   * Props to pass to the filter checkbox component.
+   */
+  filterCheckboxProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => CheckboxProps)
+    | CheckboxProps;
+  /**
+   * @deprecated Use `filterCheckboxProps` instead. This prop will be removed in a future version.
+   */
   muiFilterCheckboxProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => CheckboxProps)
     | CheckboxProps;
+  /**
+   * Props to pass to the filter date picker component.
+   */
+  filterDatePickerProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        rangeFilterIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => DatePickerProps)
+    | DatePickerProps;
+  /**
+   * @deprecated Use `filterDatePickerProps` instead. This prop will be removed in a future version.
+   */
   muiFilterDatePickerProps?:
     | ((props: {
         column: MRT_Column<TData>;
         rangeFilterIndex?: number;
         table: MRT_TableInstance<TData>;
-      }) => DatePickerProps<never>)
-    | DatePickerProps<never>;
+      }) => DatePickerProps)
+    | DatePickerProps;
+  /**
+   * Props to pass to the filter date time picker component.
+   */
+  filterDateTimePickerProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        rangeFilterIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => DateTimePickerProps)
+    | DateTimePickerProps;
+  /**
+   * @deprecated Use `filterDateTimePickerProps` instead. This prop will be removed in a future version.
+   */
   muiFilterDateTimePickerProps?:
     | ((props: {
         column: MRT_Column<TData>;
         rangeFilterIndex?: number;
         table: MRT_TableInstance<TData>;
-      }) => DateTimePickerProps<never>)
-    | DateTimePickerProps<never>;
+      }) => DateTimePickerProps)
+    | DateTimePickerProps;
+  /**
+   * Props to pass to the filter slider component.
+   */
+  filterSliderProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => SliderProps)
+    | SliderProps;
+  /**
+   * @deprecated Use `filterSliderProps` instead. This prop will be removed in a future version.
+   */
   muiFilterSliderProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => SliderProps)
     | SliderProps;
+  /**
+   * Props to pass to the filter text field component.
+   */
+  filterTextFieldProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        rangeFilterIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => TextFieldProps)
+    | TextFieldProps;
+  /**
+   * @deprecated Use `filterTextFieldProps` instead. This prop will be removed in a future version.
+   */
   muiFilterTextFieldProps?:
     | ((props: {
         column: MRT_Column<TData>;
@@ -1019,19 +1453,67 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
         table: MRT_TableInstance<TData>;
       }) => TextFieldProps)
     | TextFieldProps;
+  /**
+   * Props to pass to the filter time picker component.
+   */
+  filterTimePickerProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        rangeFilterIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => TimePickerProps)
+    | TimePickerProps;
+  /**
+   * @deprecated Use `filterTimePickerProps` instead. This prop will be removed in a future version.
+   */
   muiFilterTimePickerProps?:
     | ((props: {
         column: MRT_Column<TData>;
         rangeFilterIndex?: number;
         table: MRT_TableInstance<TData>;
-      }) => TimePickerProps<never>)
-    | TimePickerProps<never>;
+      }) => TimePickerProps)
+    | TimePickerProps;
+  /**
+   * Props to pass to the linear progress component.
+   */
+  linearProgressProps?:
+    | ((props: {
+        isTopToolbar: boolean;
+        table: MRT_TableInstance<TData>;
+      }) => LinearProgressProps)
+    | LinearProgressProps;
+  /**
+   * @deprecated Use `linearProgressProps` instead. This prop will be removed in a future version.
+   */
   muiLinearProgressProps?:
     | ((props: {
         isTopToolbar: boolean;
         table: MRT_TableInstance<TData>;
       }) => LinearProgressProps)
     | LinearProgressProps;
+  /**
+   * Props to pass to the pagination component.
+   */
+  paginationProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => Partial<
+        PaginationProps & {
+          SelectProps?: Partial<SelectProps>;
+          disabled?: boolean;
+          rowsPerPageOptions?: { label: string; value: number }[] | number[];
+          showRowsPerPage?: boolean;
+        }
+      >)
+    | Partial<
+        PaginationProps & {
+          SelectProps?: Partial<SelectProps>;
+          disabled?: boolean;
+          rowsPerPageOptions?: { label: string; value: number}[] | number[];
+          showRowsPerPage?: boolean;
+        }
+      >;
+  /**
+   * @deprecated Use `paginationProps` instead. This prop will be removed in a future version.
+   */
   muiPaginationProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => Partial<
         PaginationProps & {
@@ -1049,18 +1531,61 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
           showRowsPerPage?: boolean;
         }
       >;
+  /**
+   * Props to pass to the row drag handle component.
+   */
+  rowDragHandleProps?:
+    | ((props: {
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => IconButtonProps)
+    | IconButtonProps;
+  /**
+   * @deprecated Use `rowDragHandleProps` instead. This prop will be removed in a future version.
+   */
   muiRowDragHandleProps?:
     | ((props: {
         row: MRT_Row<TData>;
         table: MRT_TableInstance<TData>;
       }) => IconButtonProps)
     | IconButtonProps;
+  /**
+   * Props to pass to the search text field component.
+   */
+  searchTextFieldProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => TextFieldProps)
+    | TextFieldProps;
+  /**
+   * @deprecated Use `searchTextFieldProps` instead. This prop will be removed in a future version.
+   */
   muiSearchTextFieldProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => TextFieldProps)
     | TextFieldProps;
+  /**
+   * Props to pass to the select all checkbox component.
+   */
+  selectAllCheckboxProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => CheckboxProps)
+    | CheckboxProps;
+  /**
+   * @deprecated Use `selectAllCheckboxProps` instead. This prop will be removed in a future version.
+   */
   muiSelectAllCheckboxProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => CheckboxProps)
     | CheckboxProps;
+  /**
+   * Props to pass to the select checkbox component.
+   */
+  selectCheckboxProps?:
+    | ((props: {
+        row: MRT_Row<TData>;
+        staticRowIndex?: number;
+        table: MRT_TableInstance<TData>;
+      }) => CheckboxProps | RadioProps)
+    | (CheckboxProps | RadioProps);
+  /**
+   * @deprecated Use `selectCheckboxProps` instead. This prop will be removed in a future version.
+   */
   muiSelectCheckboxProps?:
     | ((props: {
         row: MRT_Row<TData>;
@@ -1068,6 +1593,20 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
         table: MRT_TableInstance<TData>;
       }) => CheckboxProps | RadioProps)
     | (CheckboxProps | RadioProps);
+  /**
+   * Props to pass to the skeleton component.
+   */
+  skeletonProps?:
+    | ((props: {
+        cell: MRT_Cell<TData>;
+        column: MRT_Column<TData>;
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => SkeletonProps)
+    | SkeletonProps;
+  /**
+   * @deprecated Use `skeletonProps` instead. This prop will be removed in a future version.
+   */
   muiSkeletonProps?:
     | ((props: {
         cell: MRT_Cell<TData>;
@@ -1076,6 +1615,20 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
         table: MRT_TableInstance<TData>;
       }) => SkeletonProps)
     | SkeletonProps;
+  /**
+   * Props to pass to the table body cell component.
+   */
+  tableBodyCellProps?:
+    | ((props: {
+        cell: MRT_Cell<TData>;
+        column: MRT_Column<TData>;
+        row: MRT_Row<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TableCellProps)
+    | TableCellProps;
+  /**
+   * @deprecated Use `tableBodyCellProps` instead. This prop will be removed in a future version.
+   */
   muiTableBodyCellProps?:
     | ((props: {
         cell: MRT_Cell<TData>;
@@ -1084,9 +1637,32 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
         table: MRT_TableInstance<TData>;
       }) => TableCellProps)
     | TableCellProps;
+  /**
+   * Props to pass to the table body component.
+   */
+  tableBodyProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => TableBodyProps)
+    | TableBodyProps;
+  /**
+   * @deprecated Use `tableBodyProps` instead. This prop will be removed in a future version.
+   */
   muiTableBodyProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => TableBodyProps)
     | TableBodyProps;
+  /**
+   * Props to pass to the table body row component.
+   */
+  tableBodyRowProps?:
+    | ((props: {
+        isDetailPanel?: boolean;
+        row: MRT_Row<TData>;
+        staticRowIndex: number;
+        table: MRT_TableInstance<TData>;
+      }) => TableRowProps)
+    | TableRowProps;
+  /**
+   * @deprecated Use `tableBodyRowProps` instead. This prop will be removed in a future version.
+   */
   muiTableBodyRowProps?:
     | ((props: {
         isDetailPanel?: boolean;
@@ -1095,51 +1671,171 @@ export interface MRT_TableOptions<TData extends MRT_RowData>
         table: MRT_TableInstance<TData>;
       }) => TableRowProps)
     | TableRowProps;
+  /**
+   * Props to pass to the table container component.
+   */
+  tableContainerProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => TableContainerProps)
+    | TableContainerProps;
+  /**
+   * @deprecated Use `tableContainerProps` instead. This prop will be removed in a future version.
+   */
   muiTableContainerProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => TableContainerProps)
     | TableContainerProps;
+  /**
+   * Props to pass to the table footer cell component.
+   */
+  tableFooterCellProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TableCellProps)
+    | TableCellProps;
+  /**
+   * @deprecated Use `tableFooterCellProps` instead. This prop will be removed in a future version.
+   */
   muiTableFooterCellProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => TableCellProps)
     | TableCellProps;
+  /**
+   * Props to pass to the table footer component.
+   */
+  tableFooterProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => TableFooterProps)
+    | TableFooterProps;
+  /**
+   * @deprecated Use `tableFooterProps` instead. This prop will be removed in a future version.
+   */
   muiTableFooterProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => TableFooterProps)
     | TableFooterProps;
+  /**
+   * Props to pass to the table footer row component.
+   */
+  tableFooterRowProps?:
+    | ((props: {
+        footerGroup: MRT_HeaderGroup<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TableRowProps)
+    | TableRowProps;
+  /**
+   * @deprecated Use `tableFooterRowProps` instead. This prop will be removed in a future version.
+   */
   muiTableFooterRowProps?:
     | ((props: {
         footerGroup: MRT_HeaderGroup<TData>;
         table: MRT_TableInstance<TData>;
       }) => TableRowProps)
     | TableRowProps;
+  /**
+   * Props to pass to the table head cell component.
+   */
+  tableHeadCellProps?:
+    | ((props: {
+        column: MRT_Column<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TableCellProps)
+    | TableCellProps;
+  /**
+   * @deprecated Use `tableHeadCellProps` instead. This prop will be removed in a future version.
+   */
   muiTableHeadCellProps?:
     | ((props: {
         column: MRT_Column<TData>;
         table: MRT_TableInstance<TData>;
       }) => TableCellProps)
     | TableCellProps;
+  /**
+   * Props to pass to the table head component.
+   */
+  tableHeadProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => TableHeadProps)
+    | TableHeadProps;
+  /**
+   * @deprecated Use `tableHeadProps` instead. This prop will be removed in a future version.
+   */
   muiTableHeadProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => TableHeadProps)
     | TableHeadProps;
+  /**
+   * Props to pass to the table head row component.
+   */
+  tableHeadRowProps?:
+    | ((props: {
+        headerGroup: MRT_HeaderGroup<TData>;
+        table: MRT_TableInstance<TData>;
+      }) => TableRowProps)
+    | TableRowProps;
+  /**
+   * @deprecated Use `tableHeadRowProps` instead. This prop will be removed in a future version.
+   */
   muiTableHeadRowProps?:
     | ((props: {
         headerGroup: MRT_HeaderGroup<TData>;
         table: MRT_TableInstance<TData>;
       }) => TableRowProps)
     | TableRowProps;
+  /**
+   * Props to pass to the table paper component.
+   */
+  tablePaperProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => PaperProps)
+    | PaperProps;
+  /**
+   * @deprecated Use `tablePaperProps` instead. This prop will be removed in a future version.
+   */
   muiTablePaperProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => PaperProps)
     | PaperProps;
+  /**
+   * Props to pass to the table component.
+   */
+  tableProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => TableProps)
+    | TableProps;
+  /**
+   * @deprecated Use `tableProps` instead. This prop will be removed in a future version.
+   */
   muiTableProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => TableProps)
     | TableProps;
+  /**
+   * Props to pass to the toolbar alert banner chip component.
+   */
+  toolbarAlertBannerChipProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => ChipProps)
+    | ChipProps;
+  /**
+   * @deprecated Use `toolbarAlertBannerChipProps` instead. This prop will be removed in a future version.
+   */
   muiToolbarAlertBannerChipProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => ChipProps)
     | ChipProps;
+  /**
+   * Props to pass to the toolbar alert banner component.
+   */
+  toolbarAlertBannerProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => AlertProps)
+    | AlertProps;
+  /**
+   * @deprecated Use `toolbarAlertBannerProps` instead. This prop will be removed in a future version.
+   */
   muiToolbarAlertBannerProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => AlertProps)
     | AlertProps;
+  /**
+   * Props to pass to the top toolbar component.
+   */
+  topToolbarProps?:
+    | ((props: { table: MRT_TableInstance<TData> }) => BoxProps)
+    | BoxProps;
+  /**
+   * @deprecated Use `topToolbarProps` instead. This prop will be removed in a future version.
+   */
   muiTopToolbarProps?:
     | ((props: { table: MRT_TableInstance<TData> }) => BoxProps)
     | BoxProps;

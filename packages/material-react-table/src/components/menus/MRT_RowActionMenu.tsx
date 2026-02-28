@@ -1,5 +1,8 @@
 import { ReactNode, useMemo, type MouseEvent } from 'react';
-import Menu, { type MenuProps } from '@mui/material/Menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+} from '../ui/dropdown-menu';
 import { MRT_ActionMenuItem } from './MRT_ActionMenuItem';
 import {
   type MRT_Row,
@@ -8,8 +11,7 @@ import {
 } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 
-export interface MRT_RowActionMenuProps<TData extends MRT_RowData>
-  extends Partial<MenuProps> {
+export interface MRT_RowActionMenuProps<TData extends MRT_RowData> {
   anchorEl: HTMLElement | null;
   handleEdit: (event: MouseEvent) => void;
   row: MRT_Row<TData>;
@@ -25,7 +27,6 @@ export const MRT_RowActionMenu = <TData extends MRT_RowData>({
   setAnchorEl,
   staticRowIndex,
   table,
-  ...rest
 }: MRT_RowActionMenuProps<TData>) => {
   const {
     getState,
@@ -34,11 +35,10 @@ export const MRT_RowActionMenu = <TData extends MRT_RowData>({
       enableEditing,
       icons: { EditIcon },
       localization,
-      mrtTheme: { menuBackgroundColor },
       renderRowActionMenuItems,
     },
   } = table;
-  const { density } = getState();
+  const { density: _density } = getState();
 
   const menuItems = useMemo(() => {
     const items: ReactNode[] = [];
@@ -48,7 +48,7 @@ export const MRT_RowActionMenu = <TData extends MRT_RowData>({
           key={'edit'}
           icon={<EditIcon />}
           label={localization.edit}
-          onClick={handleEdit}
+          onClick={handleEdit as any}
           table={table}
         />
       );
@@ -66,21 +66,15 @@ export const MRT_RowActionMenu = <TData extends MRT_RowData>({
   if (!menuItems.length) return null;
 
   return (
-    <Menu
-      MenuListProps={{
-        dense: density === 'compact',
-        sx: {
-          backgroundColor: menuBackgroundColor,
-        },
-      }}
-      anchorEl={anchorEl}
-      disableScrollLock
-      onClick={(event) => event.stopPropagation()}
-      onClose={() => setAnchorEl(null)}
-      open={!!anchorEl}
-      {...rest}
-    >
-      {menuItems}
-    </Menu>
+    <DropdownMenu open={!!anchorEl} onOpenChange={(open) => !open && setAnchorEl(null)}>
+      <DropdownMenuContent 
+        className="min-w-[160px]"
+        align="start"
+        onClick={(event) => event.stopPropagation()}
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        {menuItems}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

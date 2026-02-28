@@ -1,5 +1,8 @@
 import { useMemo } from 'react';
-import Menu, { type MenuProps } from '@mui/material/Menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+} from '../ui/dropdown-menu';
 import { MRT_ActionMenuItem } from './MRT_ActionMenuItem';
 import {
   type MRT_FilterOption,
@@ -9,6 +12,19 @@ import {
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
+
+// MenuProps type for compatibility
+interface MenuProps {
+  anchorEl?: HTMLElement | null;
+  open?: boolean;
+  onClose?: () => void;
+  anchorOrigin?: { horizontal: string; vertical: string };
+  disableScrollLock?: boolean;
+  MenuListProps?: {
+    dense?: boolean;
+    sx?: any;
+  };
+}
 
 export const mrtFilterOptions = (
   localization: MRT_Localization,
@@ -121,7 +137,6 @@ export const MRT_FilterOptionMenu = <TData extends MRT_RowData>({
   setAnchorEl,
   setFilterValue,
   table,
-  ...rest
 }: MRT_FilterOptionMenuProps<TData>) => {
   const {
     getState,
@@ -129,14 +144,14 @@ export const MRT_FilterOptionMenu = <TData extends MRT_RowData>({
       columnFilterModeOptions,
       globalFilterModeOptions,
       localization,
-      mrtTheme: { menuBackgroundColor },
+      mrtTheme: { menuBackgroundColor: _menuBackgroundColor },
       renderColumnFilterModeMenuItems,
       renderGlobalFilterModeMenuItems,
     },
     setColumnFilterFns,
     setGlobalFilterFn,
   } = table;
-  const { density, globalFilterFn } = getState();
+  const { density: _density, globalFilterFn } = getState();
   const { column } = header ?? {};
   const { columnDef } = column ?? {};
   const currentFilterValue = column?.getFilterValue();
@@ -239,52 +254,45 @@ export const MRT_FilterOptionMenu = <TData extends MRT_RowData>({
     !!header && columnDef ? columnDef._filterFn : globalFilterFn;
 
   return (
-    <Menu
-      MenuListProps={{
-        dense: density === 'compact',
-        sx: {
-          backgroundColor: menuBackgroundColor,
-        },
-      }}
-      anchorEl={anchorEl}
-      anchorOrigin={{ horizontal: 'right', vertical: 'center' }}
-      disableScrollLock
-      onClose={() => setAnchorEl(null)}
-      open={!!anchorEl}
-      {...rest}
-    >
-      {(header && column && columnDef
-        ? (columnDef.renderColumnFilterModeMenuItems?.({
-            column: column as any,
-            internalFilterOptions,
-            onSelectFilterMode: handleSelectFilterMode,
-            table,
-          }) ??
-          renderColumnFilterModeMenuItems?.({
-            column: column as any,
-            internalFilterOptions,
-            onSelectFilterMode: handleSelectFilterMode,
-            table,
-          }))
-        : renderGlobalFilterModeMenuItems?.({
-            internalFilterOptions,
-            onSelectFilterMode: handleSelectFilterMode,
-            table,
-          })) ??
-        internalFilterOptions.map(
-          ({ divider, label, option, symbol }, index) => (
-            <MRT_ActionMenuItem
-              divider={divider}
-              icon={symbol}
-              key={index}
-              label={label}
-              onClick={() => handleSelectFilterMode(option as MRT_FilterOption)}
-              selected={option === filterOption}
-              table={table}
-              value={option}
-            />
-          ),
-        )}
-    </Menu>
+    <DropdownMenu open={!!anchorEl} onOpenChange={(open) => !open && setAnchorEl(null)}>
+      <DropdownMenuContent 
+        className="min-w-[200px]"
+        align="start"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        {(header && column && columnDef
+          ? (columnDef.renderColumnFilterModeMenuItems?.({
+              column: column as any,
+              internalFilterOptions,
+              onSelectFilterMode: handleSelectFilterMode,
+              table,
+            }) ??
+            renderColumnFilterModeMenuItems?.({
+              column: column as any,
+              internalFilterOptions,
+              onSelectFilterMode: handleSelectFilterMode,
+              table,
+            }))
+          : renderGlobalFilterModeMenuItems?.({
+              internalFilterOptions,
+              onSelectFilterMode: handleSelectFilterMode,
+              table,
+            })) ??
+          internalFilterOptions.map(
+            ({ divider, label, option, symbol }, index) => (
+              <MRT_ActionMenuItem
+                divider={divider}
+                icon={symbol}
+                key={index}
+                label={label}
+                onClick={() => handleSelectFilterMode(option as MRT_FilterOption)}
+                selected={option === filterOption}
+                table={table}
+                value={option}
+              />
+            ),
+          )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

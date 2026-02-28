@@ -1,4 +1,4 @@
-import TableHead, { type TableHeadProps } from '@mui/material/TableHead';
+import { TableHeader } from '../ui/table';
 import { MRT_TableHeadRow } from './MRT_TableHeadRow';
 import {
   type MRT_ColumnVirtualizer,
@@ -7,9 +7,11 @@ import {
 } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_ToolbarAlertBanner } from '../toolbar/MRT_ToolbarAlertBanner';
+import { cn } from '../../lib/utils';
+import type { HTMLAttributes } from 'react';
 
 export interface MRT_TableHeadProps<TData extends MRT_RowData>
-  extends TableHeadProps {
+  extends HTMLAttributes<HTMLTableSectionElement> {
   columnVirtualizer?: MRT_ColumnVirtualizer;
   table: MRT_TableInstance<TData>;
 }
@@ -39,23 +41,25 @@ export const MRT_TableHead = <TData extends MRT_RowData>({
   const stickyHeader = enableStickyHeader || isFullScreen;
 
   return (
-    <TableHead
+    <TableHeader
       {...tableHeadProps}
       ref={(ref: HTMLTableSectionElement) => {
         tableHeadRef.current = ref;
-        if (tableHeadProps?.ref) {
-          // @ts-expect-error
-          tableHeadProps.ref.current = ref;
+        if ((tableHeadProps as any)?.ref) {
+          (tableHeadProps as any).ref.current = ref;
         }
       }}
-      sx={(theme) => ({
-        display: layoutMode?.startsWith('grid') ? 'grid' : undefined,
-        opacity: 0.97,
+      className={cn(
+        layoutMode?.startsWith('grid') && 'grid',
+        stickyHeader && 'sticky opacity-97',
+        stickyHeader && layoutMode?.startsWith('grid') && 'top-0',
+        stickyHeader && 'z-[2]',
+        tableHeadProps?.className
+      )}
+      style={{
         position: stickyHeader ? 'sticky' : 'relative',
-        top: stickyHeader && layoutMode?.startsWith('grid') ? 0 : undefined,
-        zIndex: stickyHeader ? 2 : undefined,
-        ...(parseFromValuesOrFunc(tableHeadProps?.sx, theme) as any),
-      })}
+        ...tableHeadProps?.style,
+      }}
     >
       {positionToolbarAlertBanner === 'head-overlay' &&
       (showAlertBanner || table.getSelectedRowModel().rows.length > 0) ? (
@@ -86,6 +90,6 @@ export const MRT_TableHead = <TData extends MRT_RowData>({
             />
           ))
       )}
-    </TableHead>
+    </TableHeader>
   );
 };

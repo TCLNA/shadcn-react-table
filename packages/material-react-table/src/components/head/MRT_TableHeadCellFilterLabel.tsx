@@ -1,9 +1,7 @@
 import { type MouseEvent, useState } from 'react';
-import Box from '@mui/material/Box';
-import Grow from '@mui/material/Grow';
-import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Popover from '@mui/material/Popover';
-import Tooltip from '@mui/material/Tooltip';
+import { Button } from '../ui/button';
+import { Popover, PopoverContent } from '../ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { MRT_TableHeadCellFilterContainer } from './MRT_TableHeadCellFilterContainer';
 import {
   type MRT_Header,
@@ -14,7 +12,16 @@ import {
   getColumnFilterInfo,
   useDropdownOptions,
 } from '../../utils/column.utils';
-import { getValueAndLabel, parseFromValuesOrFunc } from '../../utils/utils';
+import { getValueAndLabel } from '../../utils/utils';
+import { cn } from '../../lib/utils';
+
+// IconButtonProps type for compatibility
+interface IconButtonProps {
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
+  disabled?: boolean;
+  className?: string;
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+}
 
 export interface MRT_TableHeadCellFilterLabelProps<TData extends MRT_RowData>
   extends IconButtonProps {
@@ -104,73 +111,55 @@ export const MRT_TableHeadCellFilterLabel = <TData extends MRT_RowData = {}>({
 
   return (
     <>
-      <Grow
-        in={
-          columnFilterDisplayMode === 'popover' ||
-          (!!filterValue && !isRangeFilter) ||
-          (isRangeFilter && (!!filterValue?.[0] || !!filterValue?.[1]))
-        }
-        unmountOnExit
-      >
-        <Box component="span" sx={{ flex: '0 0' }}>
-          <Tooltip placement="top" title={filterTooltip}>
-            <IconButton
-              disableRipple
-              onClick={(event: MouseEvent<HTMLButtonElement>) => {
-                if (columnFilterDisplayMode === 'popover') {
-                  setAnchorEl(event.currentTarget);
-                } else {
-                  setShowColumnFilters(true);
-                }
-                queueMicrotask(() => {
-                  filterInputRefs.current?.[`${column.id}-0`]?.focus?.();
-                  filterInputRefs.current?.[`${column.id}-0`]?.select?.();
-                });
-                event.stopPropagation();
-              }}
-              size="small"
-              {...rest}
-              sx={(theme) => ({
-                height: '16px',
-                ml: '4px',
-                opacity: isFilterActive ? 1 : 0.3,
-                p: '8px',
-                transform: 'scale(0.75)',
-                transition: 'all 150ms ease-in-out',
-                width: '16px',
-                ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-              })}
-            >
-              <FilterAltIcon />
-            </IconButton>
+      {(columnFilterDisplayMode === 'popover' ||
+        (!!filterValue && !isRangeFilter) ||
+        (isRangeFilter && (!!filterValue?.[0] || !!filterValue?.[1]))) && (
+        <span className="flex-[0_0_auto]">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(event: MouseEvent<HTMLButtonElement>) => {
+                  if (columnFilterDisplayMode === 'popover') {
+                    setAnchorEl(event.currentTarget);
+                  } else {
+                    setShowColumnFilters(true);
+                  }
+                  queueMicrotask(() => {
+                    filterInputRefs.current?.[`${column.id}-0`]?.focus?.();
+                    filterInputRefs.current?.[`${column.id}-0`]?.select?.();
+                  });
+                  event.stopPropagation();
+                }}
+                className={cn(
+                  "h-4 w-4 ml-1 p-2 transition-all duration-150",
+                  isFilterActive ? "opacity-100" : "opacity-30",
+                  "scale-75",
+                  rest?.className
+                )}
+                {...rest}
+              >
+                <FilterAltIcon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              {filterTooltip}
+            </TooltipContent>
           </Tooltip>
-        </Box>
-      </Grow>
+        </span>
+      )}
       {columnFilterDisplayMode === 'popover' && (
-        <Popover
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            horizontal: 'center',
-            vertical: 'top',
-          }}
-          disableScrollLock
-          onClick={(event) => event.stopPropagation()}
-          onClose={(event) => {
-            //@ts-expect-error
-            event.stopPropagation();
-            setAnchorEl(null);
-          }}
-          onKeyDown={(event) => event.key === 'Enter' && setAnchorEl(null)}
-          open={!!anchorEl}
-          slotProps={{ paper: { sx: { overflow: 'visible' } } }}
-          transformOrigin={{
-            horizontal: 'center',
-            vertical: 'bottom',
-          }}
-        >
-          <Box sx={{ p: '1rem' }}>
+        <Popover open={!!anchorEl} onOpenChange={(open) => !open && setAnchorEl(null)}>
+          <PopoverContent
+            className="p-4 overflow-visible"
+            align="center"
+            side="top"
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.key === 'Enter' && setAnchorEl(null)}
+          >
             <MRT_TableHeadCellFilterContainer header={header} table={table} />
-          </Box>
+          </PopoverContent>
         </Popover>
       )}
     </>

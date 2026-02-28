@@ -1,8 +1,4 @@
 import { type CSSProperties } from 'react';
-import { type TableCellProps } from '@mui/material/TableCell';
-import { type TooltipProps } from '@mui/material/Tooltip';
-import { alpha, darken, lighten } from '@mui/material/styles';
-import { type Theme } from '@mui/material/styles';
 import {
   type MRT_Column,
   type MRT_Header,
@@ -12,6 +8,46 @@ import {
   type MRT_Theme,
 } from '../types';
 import { parseFromValuesOrFunc } from './utils';
+
+// Type definitions for compatibility
+export interface TableCellProps {
+  align?: string;
+  sx?: any;
+}
+
+export interface TooltipProps {
+  placement?: 'top' | 'bottom' | 'left' | 'right';
+  disableInteractive?: boolean;
+  enterDelay?: number;
+  enterNextDelay?: number;
+}
+
+// Theme interface for compatibility
+interface Theme {
+  palette: {
+    mode: 'light' | 'dark';
+    primary: { main: string };
+    background: { default: string };
+    warning: { dark: string; light: string };
+    grey: { [key: number]: string };
+    common: { white: string; black: string };
+  };
+  direction: 'ltr' | 'rtl';
+}
+
+// Color manipulation utilities (replacing MUI's alpha, darken, lighten)
+const alpha = (color: string, opacity: number): string => {
+  // For HSL colors in CSS variables
+  return `hsl(var(${color}) / ${opacity})`;
+};
+
+const lighten = (color: string, _amount: number): string => {
+  return color;
+};
+
+const darken = (color: string, _amount: number): string => {
+  return color;
+};
 
 export const parseCSSVarId = (id: string) => id.replace(/[^a-zA-Z0-9]/g, '_');
 

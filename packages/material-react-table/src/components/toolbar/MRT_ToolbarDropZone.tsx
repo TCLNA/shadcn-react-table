@@ -1,10 +1,12 @@
 import { type DragEvent, useEffect } from 'react';
-import Box, { type BoxProps } from '@mui/material/Box';
-import Fade from '@mui/material/Fade';
-import Typography from '@mui/material/Typography';
-import { alpha } from '@mui/material/styles';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
-import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '../../lib/utils';
+
+interface BoxProps {
+  className?: string;
+  onDragEnter?: (event: DragEvent<HTMLDivElement>) => void;
+  onDragOver?: (event: DragEvent<HTMLDivElement>) => void;
+}
 
 export interface MRT_ToolbarDropZoneProps<TData extends MRT_RowData>
   extends BoxProps {
@@ -44,38 +46,31 @@ export const MRT_ToolbarDropZone = <TData extends MRT_RowData>({
     }
   }, [enableGrouping, draggingColumn, grouping]);
 
+  if (!showToolbarDropZone) return null;
+
   return (
-    <Fade in={showToolbarDropZone}>
-      <Box
-        className="Mui-ToolbarDropZone"
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragOver}
-        {...rest}
-        sx={(theme) => ({
-          alignItems: 'center',
-          backdropFilter: 'blur(4px)',
-          backgroundColor: alpha(
-            theme.palette.info.main,
-            hoveredColumn?.id === 'drop-zone' ? 0.2 : 0.1,
-          ),
-          border: `dashed ${theme.palette.info.main} 2px`,
-          boxSizing: 'border-box',
-          display: 'flex',
-          height: '100%',
-          justifyContent: 'center',
-          position: 'absolute',
-          width: '100%',
-          zIndex: 4,
-          ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-        })}
-      >
-        <Typography fontStyle="italic">
-          {localization.dropToGroupBy.replace(
-            '{column}',
-            draggingColumn?.columnDef?.header ?? '',
-          )}
-        </Typography>
-      </Box>
-    </Fade>
+    <div
+      className={cn(
+        "Mui-ToolbarDropZone",
+        "flex items-center justify-center",
+        "absolute w-full h-full z-[4]",
+        "backdrop-blur-sm",
+        "border-2 border-dashed border-info",
+        "bg-info/10",
+        hoveredColumn?.id === 'drop-zone' && "bg-info/20",
+        "box-border",
+        rest?.className
+      )}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      {...rest}
+    >
+      <p className="italic">
+        {localization.dropToGroupBy.replace(
+          '{column}',
+          draggingColumn?.columnDef?.header ?? '',
+        )}
+      </p>
+    </div>
   );
 };

@@ -1,8 +1,10 @@
-import Dialog, { type DialogProps } from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Stack from '@mui/material/Stack';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
 import {
   type MRT_Row,
   type MRT_RowData,
@@ -11,17 +13,20 @@ import {
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_EditActionButtons } from '../buttons/MRT_EditActionButtons';
 import { MRT_EditCellTextField } from '../inputs/MRT_EditCellTextField';
+import { cn } from '../../lib/utils';
 
-export interface MRT_EditRowModalProps<TData extends MRT_RowData>
-  extends Partial<DialogProps> {
+export interface MRT_EditRowModalProps<TData extends MRT_RowData> {
   open: boolean;
   table: MRT_TableInstance<TData>;
+  onOpenChange?: (open: boolean) => void;
+  className?: string;
 }
 
 export const MRT_EditRowModal = <TData extends MRT_RowData>({
   open,
   table,
-  ...rest
+  onOpenChange,
+  className,
 }: MRT_EditRowModalProps<TData>) => {
   const {
     getState,
@@ -44,7 +49,6 @@ export const MRT_EditRowModal = <TData extends MRT_RowData>({
     ...parseFromValuesOrFunc(muiEditRowDialogProps, { row, table }),
     ...(creatingRow &&
       parseFromValuesOrFunc(muiCreateRowModalProps, { row, table })),
-    ...rest,
   };
 
   const internalEditComponents = row
@@ -58,57 +62,54 @@ export const MRT_EditRowModal = <TData extends MRT_RowData>({
       />
     ));
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      if (creatingRow) {
+        onCreatingRowCancel?.({ row, table });
+        setCreatingRow(null);
+      } else {
+        onEditingRowCancel?.({ row, table });
+        setEditingRow(null);
+      }
+      row._valuesCache = {} as any; //reset values cache
+    }
+    onOpenChange?.(newOpen);
+  };
+
   return (
-    <Dialog
-      fullWidth
-      maxWidth="xs"
-      onClose={(event, reason) => {
-        if (creatingRow) {
-          onCreatingRowCancel?.({ row, table });
-          setCreatingRow(null);
-        } else {
-          onEditingRowCancel?.({ row, table });
-          setEditingRow(null);
-        }
-        row._valuesCache = {} as any; //reset values cache
-        dialogProps.onClose?.(event, reason);
-      }}
-      open={open}
-      {...dialogProps}
-    >
-      {((creatingRow &&
-        renderCreateRowDialogContent?.({
-          internalEditComponents,
-          row,
-          table,
-        })) ||
-        renderEditRowDialogContent?.({
-          internalEditComponents,
-          row,
-          table,
-        })) ?? (
-        <>
-          <DialogTitle sx={{ textAlign: 'center' }}>
-            {localization.edit}
-          </DialogTitle>
-          <DialogContent>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        className={cn('max-w-md', (dialogProps as any).className, className)}
+        {...dialogProps}
+      >
+        {((creatingRow &&
+          renderCreateRowDialogContent?.({
+            internalEditComponents,
+            row,
+            table,
+          })) ||
+          renderEditRowDialogContent?.({
+            internalEditComponents,
+            row,
+            table,
+          })) ?? (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-center">
+                {localization.edit}
+              </DialogTitle>
+            </DialogHeader>
             <form onSubmit={(e) => e.preventDefault()}>
-              <Stack
-                sx={{
-                  gap: '32px',
-                  paddingTop: '16px',
-                  width: '100%',
-                }}
-              >
+              <div className="flex flex-col gap-8 pt-4 w-full">
                 {internalEditComponents}
-              </Stack>
+              </div>
             </form>
-          </DialogContent>
-          <DialogActions sx={{ p: '1.25rem' }}>
-            <MRT_EditActionButtons row={row} table={table} variant="text" />
-          </DialogActions>
-        </>
-      )}
+            <DialogFooter className="pt-5">
+              <MRT_EditActionButtons row={row} table={table} variant="text" />
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
     </Dialog>
   );
 };

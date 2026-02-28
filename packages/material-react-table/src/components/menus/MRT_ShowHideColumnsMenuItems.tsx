@@ -5,25 +5,20 @@ import {
   useRef,
   useState,
 } from 'react';
-import Box from '@mui/material/Box';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import MenuItem, { type MenuItemProps } from '@mui/material/MenuItem';
-import Switch from '@mui/material/Switch';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
+import { Switch } from '../ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { cn } from '../../lib/utils';
 import {
   type MRT_Column,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
 import { reorderColumn } from '../../utils/column.utils';
-import { getCommonTooltipProps } from '../../utils/style.utils';
-import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_ColumnPinningButtons } from '../buttons/MRT_ColumnPinningButtons';
 import { MRT_GrabHandleButton } from '../buttons/MRT_GrabHandleButton';
 
-export interface MRT_ShowHideColumnsMenuItemsProps<TData extends MRT_RowData>
-  extends MenuItemProps {
+export interface MRT_ShowHideColumnsMenuItemsProps<TData extends MRT_RowData> {
   allColumns: MRT_Column<TData>[];
   column: MRT_Column<TData>;
   hoveredColumn: MRT_Column<TData> | null;
@@ -39,7 +34,6 @@ export const MRT_ShowHideColumnsMenuItems = <TData extends MRT_RowData>({
   isNestedColumns,
   setHoveredColumn,
   table,
-  ...rest
 }: MRT_ShowHideColumnsMenuItemsProps<TData>) => {
   const {
     getState,
@@ -48,7 +42,6 @@ export const MRT_ShowHideColumnsMenuItems = <TData extends MRT_RowData>({
       enableColumnPinning,
       enableHiding,
       localization,
-      mrtTheme: { draggingBorderColor },
     },
     setColumnOrder,
     setColumnPinning,
@@ -111,34 +104,19 @@ export const MRT_ShowHideColumnsMenuItems = <TData extends MRT_RowData>({
 
   return (
     <>
-      <MenuItem
-        disableRipple
+      <DropdownMenuItem
         onDragEnter={handleDragEnter}
         ref={menuItemRef as any}
-        {...rest}
-        sx={(theme) => ({
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          my: 0,
-          opacity: isDragging ? 0.5 : 1,
-          outline: isDragging
-            ? `2px dashed ${theme.palette.grey[500]}`
-            : hoveredColumn?.id === column.id
-              ? `2px dashed ${draggingBorderColor}`
-              : 'none',
-          outlineOffset: '-2px',
-          pl: `${(column.depth + 0.5) * 2}rem`,
-          py: '6px',
-          ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-        })}
+        className={cn(
+          "flex items-center justify-start my-0 py-1.5 cursor-default",
+          isDragging && "opacity-50 outline outline-2 outline-dashed outline-gray-500 outline-offset-[-2px]",
+          hoveredColumn?.id === column.id && !isDragging && "outline outline-2 outline-dashed outline-primary outline-offset-[-2px]"
+        )}
+        style={{
+          paddingLeft: `${(column.depth + 0.5) * 2}rem`,
+        }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'nowrap',
-            gap: '8px',
-          }}
-        >
+        <div className="flex flex-nowrap gap-2">
           {columnDefType !== 'group' &&
             enableColumnOrdering &&
             !isNestedColumns &&
@@ -149,44 +127,44 @@ export const MRT_ShowHideColumnsMenuItems = <TData extends MRT_RowData>({
                 table={table}
               />
             ) : (
-              <Box sx={{ width: '28px' }} />
+              <div className="w-7" />
             ))}
           {enableColumnPinning &&
             (column.getCanPin() ? (
               <MRT_ColumnPinningButtons column={column} table={table} />
             ) : (
-              <Box sx={{ width: '70px' }} />
+              <div className="w-[70px]" />
             ))}
           {enableHiding ? (
-            <FormControlLabel
-              checked={switchChecked}
-              componentsProps={{
-                typography: {
-                  sx: {
-                    mb: 0,
-                    opacity: columnDefType !== 'display' ? 1 : 0.5,
-                  },
-                },
-              }}
-              control={
-                <Tooltip
-                  {...getCommonTooltipProps()}
-                  title={localization.toggleVisibility}
-                >
-                  <Switch />
+            <label className="flex items-center gap-2 cursor-pointer">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Switch
+                      checked={switchChecked}
+                      disabled={!column.getCanHide()}
+                      onCheckedChange={() => handleToggleColumnHidden(column)}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{localization.toggleVisibility}</p>
+                  </TooltipContent>
                 </Tooltip>
-              }
-              disabled={!column.getCanHide()}
-              label={columnDef.header}
-              onChange={() => handleToggleColumnHidden(column)}
-            />
+              </TooltipProvider>
+              <span className={cn(
+                "mb-0",
+                columnDefType !== 'display' ? "opacity-100" : "opacity-50"
+              )}>
+                {columnDef.header}
+              </span>
+            </label>
           ) : (
-            <Typography sx={{ alignSelf: 'center' }}>
+            <span className="self-center">
               {columnDef.header}
-            </Typography>
+            </span>
           )}
-        </Box>
-      </MenuItem>
+        </div>
+      </DropdownMenuItem>
       {column.columns?.map((c: MRT_Column<TData>, i) => (
         <MRT_ShowHideColumnsMenuItems
           allColumns={allColumns}

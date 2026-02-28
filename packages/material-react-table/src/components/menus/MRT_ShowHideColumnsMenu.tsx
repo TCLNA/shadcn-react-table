@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Menu, { type MenuProps } from '@mui/material/Menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+} from '../ui/dropdown-menu';
+import { MRT_Button } from '../buttons/MRT_Button';
 import { MRT_ShowHideColumnsMenuItems } from './MRT_ShowHideColumnsMenuItems';
 import {
   type MRT_Column,
@@ -12,8 +14,7 @@ import {
 } from '../../types';
 import { getDefaultColumnOrderIds } from '../../utils/displayColumn.utils';
 
-export interface MRT_ShowHideColumnsMenuProps<TData extends MRT_RowData>
-  extends Partial<MenuProps> {
+export interface MRT_ShowHideColumnsMenuProps<TData extends MRT_RowData> {
   anchorEl: HTMLElement | null;
   isSubMenu?: boolean;
   setAnchorEl: (anchorEl: HTMLElement | null) => void;
@@ -24,7 +25,6 @@ export const MRT_ShowHideColumnsMenu = <TData extends MRT_RowData>({
   anchorEl,
   setAnchorEl,
   table,
-  ...rest
 }: MRT_ShowHideColumnsMenuProps<TData>) => {
   const {
     getAllColumns,
@@ -42,10 +42,9 @@ export const MRT_ShowHideColumnsMenu = <TData extends MRT_RowData>({
       enableColumnPinning,
       enableHiding,
       localization,
-      mrtTheme: { menuBackgroundColor },
     },
   } = table;
-  const { columnOrder, columnPinning, density } = getState();
+  const { columnOrder, columnPinning, density: _density } = getState();
 
   const handleToggleAllColumns = (value?: boolean) => {
     const updates =
@@ -102,76 +101,71 @@ export const MRT_ShowHideColumnsMenu = <TData extends MRT_RowData>({
   );
 
   return (
-    <Menu
-      MenuListProps={{
-        dense: density === 'compact',
-        sx: {
-          backgroundColor: menuBackgroundColor,
-        },
-      }}
-      anchorEl={anchorEl}
-      disableScrollLock
-      onClose={() => setAnchorEl(null)}
-      open={!!anchorEl}
-      {...rest}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          p: '0.5rem',
-          pt: 0,
-        }}
+    <DropdownMenu open={!!anchorEl} onOpenChange={(open) => !open && setAnchorEl(null)}>
+      <DropdownMenuContent 
+        className="min-w-[300px] max-h-[400px] overflow-y-auto"
+        align="start"
+        onCloseAutoFocus={(e) => e.preventDefault()}
       >
-        {enableHiding && (
-          <Button
-            disabled={!getIsSomeColumnsVisible()}
-            onClick={() => handleToggleAllColumns(false)}
-          >
-            {localization.hideAll}
-          </Button>
-        )}
-        {enableColumnOrdering && (
-          <Button
-            onClick={() =>
-              table.setColumnOrder(
-                getDefaultColumnOrderIds(table.options, true),
-              )
-            }
-            disabled={!hasColumnOrderChanged}
-          >
-            {localization.resetOrder}
-          </Button>
-        )}
-        {enableColumnPinning && (
-          <Button
-            disabled={!getIsSomeColumnsPinned()}
-            onClick={() => table.resetColumnPinning(true)}
-          >
-            {localization.unpinAll}
-          </Button>
-        )}
-        {enableHiding && (
-          <Button
-            disabled={getIsAllColumnsVisible()}
-            onClick={() => handleToggleAllColumns(true)}
-          >
-            {localization.showAll}
-          </Button>
-        )}
-      </Box>
-      <Divider />
-      {allColumns.map((column, index) => (
-        <MRT_ShowHideColumnsMenuItems
-          allColumns={allColumns}
-          column={column}
-          hoveredColumn={hoveredColumn}
-          isNestedColumns={isNestedColumns}
-          key={`${index}-${column.id}`}
-          setHoveredColumn={setHoveredColumn}
-          table={table}
-        />
-      ))}
-    </Menu>
+        <div className="flex justify-between gap-2 p-2 pt-0">
+          {enableHiding && (
+            <MRT_Button
+              variant="ghost"
+              size="sm"
+              disabled={!getIsSomeColumnsVisible()}
+              onClick={() => handleToggleAllColumns(false)}
+            >
+              {localization.hideAll}
+            </MRT_Button>
+          )}
+          {enableColumnOrdering && (
+            <MRT_Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                table.setColumnOrder(
+                  getDefaultColumnOrderIds(table.options, true),
+                )
+              }
+              disabled={!hasColumnOrderChanged}
+            >
+              {localization.resetOrder}
+            </MRT_Button>
+          )}
+          {enableColumnPinning && (
+            <MRT_Button
+              variant="ghost"
+              size="sm"
+              disabled={!getIsSomeColumnsPinned()}
+              onClick={() => table.resetColumnPinning(true)}
+            >
+              {localization.unpinAll}
+            </MRT_Button>
+          )}
+          {enableHiding && (
+            <MRT_Button
+              variant="ghost"
+              size="sm"
+              disabled={getIsAllColumnsVisible()}
+              onClick={() => handleToggleAllColumns(true)}
+            >
+              {localization.showAll}
+            </MRT_Button>
+          )}
+        </div>
+        <DropdownMenuSeparator />
+        {allColumns.map((column, index) => (
+          <MRT_ShowHideColumnsMenuItems
+            allColumns={allColumns}
+            column={column}
+            hoveredColumn={hoveredColumn}
+            isNestedColumns={isNestedColumns}
+            key={`${index}-${column.id}`}
+            setHoveredColumn={setHoveredColumn}
+            table={table}
+          />
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

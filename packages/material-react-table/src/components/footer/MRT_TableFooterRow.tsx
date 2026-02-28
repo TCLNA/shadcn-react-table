@@ -1,4 +1,5 @@
-import TableRow, { type TableRowProps } from '@mui/material/TableRow';
+import { type HTMLAttributes } from 'react';
+import { TableRow } from '../ui/table';
 import { MRT_TableFooterCell } from './MRT_TableFooterCell';
 import {
   type MRT_ColumnVirtualizer,
@@ -9,9 +10,10 @@ import {
   type MRT_VirtualItem,
 } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '../../lib/utils';
 
 export interface MRT_TableFooterRowProps<TData extends MRT_RowData>
-  extends TableRowProps {
+  extends HTMLAttributes<HTMLTableRowElement> {
   columnVirtualizer?: MRT_ColumnVirtualizer;
   footerGroup: MRT_HeaderGroup<TData>;
   table: MRT_TableInstance<TData>;
@@ -57,13 +59,15 @@ export const MRT_TableFooterRow = <TData extends MRT_RowData>({
   return (
     <TableRow
       {...tableRowProps}
-      sx={(theme) => ({
+      className={cn(
+        layoutMode?.startsWith('grid') && 'flex',
+        'relative w-full',
+        tableRowProps?.className,
+      )}
+      style={{
         backgroundColor: baseBackgroundColor,
-        display: layoutMode?.startsWith('grid') ? 'flex' : undefined,
-        position: 'relative',
-        width: '100%',
-        ...(parseFromValuesOrFunc(tableRowProps?.sx, theme) as any),
-      })}
+        ...tableRowProps?.style,
+      }}
     >
       {virtualPaddingLeft ? (
         <th style={{ display: 'flex', width: virtualPaddingLeft }} />

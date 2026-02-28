@@ -1,17 +1,18 @@
-import Menu, { type MenuProps } from '@mui/material/Menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+} from '../ui/dropdown-menu';
 import { MRT_ActionMenuItem } from './MRT_ActionMenuItem';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
 import { openEditingCell } from '../../utils/cell.utils';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 
-export interface MRT_CellActionMenuProps<TData extends MRT_RowData>
-  extends Partial<MenuProps> {
+export interface MRT_CellActionMenuProps<TData extends MRT_RowData> {
   table: MRT_TableInstance<TData>;
 }
 
 export const MRT_CellActionMenu = <TData extends MRT_RowData>({
   table,
-  ...rest
 }: MRT_CellActionMenuProps<TData>) => {
   const {
     getState,
@@ -21,19 +22,19 @@ export const MRT_CellActionMenu = <TData extends MRT_RowData>({
       enableEditing,
       icons: { ContentCopy, EditIcon },
       localization,
-      mrtTheme: { menuBackgroundColor },
+      mrtTheme: { menuBackgroundColor: _menuBackgroundColor },
       renderCellActionMenuItems,
     },
     refs: { actionCellRef },
   } = table;
-  const { actionCell, density } = getState();
+  const { actionCell, density: _density } = getState();
   const cell = actionCell!;
   const { row } = cell;
   const { column } = cell;
   const { columnDef } = column;
 
-  const handleClose = (event?: any) => {
-    event?.stopPropagation();
+  const handleClose = (...args: any[]) => {
+    args[0]?.stopPropagation?.();
     table.setActionCell(null);
     actionCellRef.current = null;
   };
@@ -83,23 +84,16 @@ export const MRT_CellActionMenu = <TData extends MRT_RowData>({
 
   return (
     (!!menuItems?.length || !!internalMenuItems?.length) && (
-      <Menu
-        MenuListProps={{
-          dense: density === 'compact',
-          sx: {
-            backgroundColor: menuBackgroundColor,
-          },
-        }}
-        anchorEl={actionCellRef.current}
-        disableScrollLock
-        onClick={(event) => event.stopPropagation()}
-        onClose={handleClose}
-        open={!!cell}
-        transformOrigin={{ horizontal: -100, vertical: 8 }}
-        {...rest}
-      >
-        {menuItems ?? internalMenuItems}
-      </Menu>
+      <DropdownMenu open={!!cell} onOpenChange={(open) => !open && handleClose()}>
+        <DropdownMenuContent 
+          className="min-w-[200px]"
+          align="start"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          onClick={(event) => event.stopPropagation()}
+        >
+          {menuItems ?? internalMenuItems}
+        </DropdownMenuContent>
+      </DropdownMenu>
     )
   );
 };

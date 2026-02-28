@@ -1,62 +1,74 @@
 import { type ReactNode } from 'react';
-import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import MenuItem, { type MenuItemProps } from '@mui/material/MenuItem';
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from '../ui/dropdown-menu';
+import { cn } from '../../lib/utils';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
 
-export interface MRT_ActionMenuItemProps<TData extends MRT_RowData>
-  extends MenuItemProps {
+export interface MRT_ActionMenuItemProps<TData extends MRT_RowData> {
   icon: ReactNode;
   label: string;
-  onOpenSubMenu?: MenuItemProps['onClick'] | MenuItemProps['onMouseEnter'];
+  onClick?: (...args: any[]) => void;
+  onOpenSubMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  disabled?: boolean;
+  divider?: boolean;
+  selected?: boolean;
   table: MRT_TableInstance<TData>;
+  value?: string;
 }
 
 export const MRT_ActionMenuItem = <TData extends MRT_RowData>({
   icon,
   label,
+  onClick,
   onOpenSubMenu,
-  table,
-  ...rest
+  disabled,
+  divider,
+  table: _table,
 }: MRT_ActionMenuItemProps<TData>) => {
-  const {
-    options: {
-      icons: { ArrowRightIcon },
-    },
-  } = table;
+  if (onOpenSubMenu) {
+    return (
+      <>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger
+            disabled={disabled}
+            className={cn(
+              "flex items-center justify-between gap-2",
+              disabled && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-4 h-4 flex items-center justify-center">{icon}</span>
+              <span>{label}</span>
+            </div>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            {/* Sub-menu content will be rendered by parent */}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        {divider && <DropdownMenuSeparator />}
+      </>
+    );
+  }
 
   return (
-    <MenuItem
-      sx={{
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        minWidth: '120px',
-        my: 0,
-        py: '6px',
-      }}
-      tabIndex={0}
-      {...rest}
-    >
-      <Box
-        sx={{
-          alignItems: 'center',
-          display: 'flex',
-        }}
+    <>
+      <DropdownMenuItem
+        disabled={disabled}
+        onClick={onClick}
+        className={cn(
+          "flex items-center gap-2 cursor-pointer",
+          disabled && "opacity-50 cursor-not-allowed"
+        )}
       >
-        <ListItemIcon>{icon}</ListItemIcon>
-        {label}
-      </Box>
-      {onOpenSubMenu && (
-        <IconButton
-          onClick={onOpenSubMenu as any}
-          onMouseEnter={onOpenSubMenu as any}
-          size="small"
-          sx={{ p: 0 }}
-        >
-          <ArrowRightIcon />
-        </IconButton>
-      )}
-    </MenuItem>
+        <span className="w-4 h-4 flex items-center justify-center">{icon}</span>
+        <span>{label}</span>
+      </DropdownMenuItem>
+      {divider && <DropdownMenuSeparator />}
+    </>
   );
 };

@@ -4,9 +4,15 @@ import {
   type KeyboardEvent,
   useState,
 } from 'react';
-import MenuItem from '@mui/material/MenuItem';
-import TextField from '@mui/material/TextField';
-import { type TextFieldProps } from '@mui/material/TextField';
+import { Input } from '../ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import { cn } from '../../lib/utils';
 import {
   type MRT_Cell,
   type MRT_RowData,
@@ -14,16 +20,16 @@ import {
 } from '../../types';
 import { getValueAndLabel, parseFromValuesOrFunc } from '../../utils/utils';
 
-export interface MRT_EditCellTextFieldProps<TData extends MRT_RowData>
-  extends TextFieldProps<'standard'> {
+export interface MRT_EditCellTextFieldProps<TData extends MRT_RowData> {
   cell: MRT_Cell<TData>;
   table: MRT_TableInstance<TData>;
+  className?: string;
 }
 
 export const MRT_EditCellTextField = <TData extends MRT_RowData>({
   cell,
   table,
-  ...rest
+  className,
 }: MRT_EditCellTextFieldProps<TData>) => {
   const {
     getState,
@@ -44,7 +50,7 @@ export const MRT_EditCellTextField = <TData extends MRT_RowData>({
   const [value, setValue] = useState(() => cell.getValue<string>());
   const [completesComposition, setCompletesComposition] = useState(true);
 
-  const textFieldProps: TextFieldProps = {
+  const textFieldProps = {
     ...parseFromValuesOrFunc(muiEditTextFieldProps, {
       cell,
       column,
@@ -57,7 +63,6 @@ export const MRT_EditCellTextField = <TData extends MRT_RowData>({
       row,
       table,
     }),
-    ...rest,
   };
 
   const selectOptions = parseFromValuesOrFunc(editSelectOptions, {
@@ -67,7 +72,8 @@ export const MRT_EditCellTextField = <TData extends MRT_RowData>({
     table,
   });
 
-  const isSelectEdit = editVariant === 'select' || textFieldProps?.select;
+  const isSelectEdit = editVariant === 'select' || (textFieldProps as any)?.select;
+  const isDisabled = parseFromValuesOrFunc(columnDef.enableEditing, row) === false;
 
   const saveInputValueToRowCache = (newValue: string) => {
     //@ts-expect-error
@@ -79,11 +85,13 @@ export const MRT_EditCellTextField = <TData extends MRT_RowData>({
     }
   };
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    textFieldProps.onChange?.(event);
-    setValue(event.target.value);
+  const handleChange = (newValue: string) => {
+    textFieldProps.onChange?.({
+      target: { value: newValue },
+    } as ChangeEvent<HTMLInputElement>);
+    setValue(newValue);
     if (isSelectEdit) {
-      saveInputValueToRowCache(event.target.value);
+      saveInputValueToRowCache(newValue);
     }
   };
 
@@ -104,90 +112,90 @@ export const MRT_EditCellTextField = <TData extends MRT_RowData>({
     return <>{columnDef.Edit?.({ cell, column, row, table })}</>;
   }
 
+  const showLabel = ['custom', 'modal'].includes(
+    (isCreating ? createDisplayMode : editDisplayMode) as string,
+  );
+
+  const placeholder = !showLabel ? columnDef.header : undefined;
+
+  // Render select edit
+  if (isSelectEdit) {
+    return (
+      <div className="w-full">
+        {showLabel && (
+          <label className="text-sm font-medium mb-1 block">
+            {columnDef.header}
+          </label>
+        )}
+        <Select
+          value={value ?? ''}
+          onValueChange={handleChange}
+          disabled={isDisabled}
+        >
+          <SelectTrigger
+            ref={(ref) => {
+              if (ref) {
+                editInputRefs.current![column.id] = ref as any;
+              }
+            }}
+            className={cn('h-9', className)}
+            onClick={(e) => {
+              e.stopPropagation();
+              textFieldProps?.onClick?.(e as any);
+            }}
+          >
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {selectOptions?.map((option) => {
+              const { label, value: optionValue } = getValueAndLabel(option);
+              return (
+                <SelectItem key={optionValue} value={optionValue}>
+                  {label}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
+  // Render text input edit
   return (
-    <TextField
-      disabled={parseFromValuesOrFunc(columnDef.enableEditing, row) === false}
-      fullWidth
-      inputRef={(inputRef) => {
-        if (inputRef) {
-          editInputRefs.current![column.id] = isSelectEdit
-            ? inputRef.node
-            : inputRef;
-          if (textFieldProps.inputRef) {
-            textFieldProps.inputRef = inputRef;
+    <div className="w-full">
+      {showLabel && (
+        <label className="text-sm font-medium mb-1 block">
+          {columnDef.header}
+        </label>
+      )}
+      <Input
+        ref={(ref) => {
+          if (ref) {
+            editInputRefs.current![column.id] = ref;
           }
-        }
-      }}
-      label={
-        ['custom', 'modal'].includes(
-          (isCreating ? createDisplayMode : editDisplayMode) as string,
-        )
-          ? columnDef.header
-          : undefined
-      }
-      margin="none"
-      name={column.id}
-      placeholder={
-        !['custom', 'modal'].includes(
-          (isCreating ? createDisplayMode : editDisplayMode) as string,
-        )
-          ? columnDef.header
-          : undefined
-      }
-      select={isSelectEdit}
-      size="small"
-      value={value ?? ''}
-      variant="standard"
-      {...textFieldProps}
-      InputProps={{
-        ...(textFieldProps.variant !== 'outlined'
-          ? { disableUnderline: editDisplayMode === 'table' }
-          : {}),
-        ...textFieldProps.InputProps,
-        sx: (theme) => ({
-          mb: 0,
-          ...(parseFromValuesOrFunc(
-            textFieldProps?.InputProps?.sx,
-            theme,
-          ) as any),
-        }),
-      }}
-      SelectProps={{
-        MenuProps: { disableScrollLock: true },
-        ...textFieldProps.SelectProps,
-      }}
-      inputProps={{
-        autoComplete: 'off',
-        ...textFieldProps.inputProps,
-      }}
-      onBlur={handleBlur}
-      onChange={handleChange}
-      onClick={(e) => {
-        e.stopPropagation();
-        textFieldProps?.onClick?.(e);
-      }}
-      onKeyDown={handleEnterKeyDown}
-      onCompositionStart={() => setCompletesComposition(false)}
-      onCompositionEnd={() => setCompletesComposition(true)}
-    >
-      {textFieldProps.children ??
-        selectOptions?.map((option) => {
-          const { label, value } = getValueAndLabel(option);
-          return (
-            <MenuItem
-              key={value}
-              sx={{
-                alignItems: 'center',
-                display: 'flex',
-                gap: '0.5rem',
-                m: 0,
-              }}
-              value={value}
-            >
-              {label}
-            </MenuItem>
-          );
-        })}
-    </TextField>
+        }}
+        type="text"
+        name={column.id}
+        value={value ?? ''}
+        onChange={(e) => handleChange(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleEnterKeyDown}
+        onCompositionStart={() => setCompletesComposition(false)}
+        onCompositionEnd={() => setCompletesComposition(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          textFieldProps?.onClick?.(e as any);
+        }}
+        placeholder={placeholder}
+        disabled={isDisabled}
+        className={cn(
+          'h-9',
+          editDisplayMode === 'table' && 'border-0 shadow-none focus-visible:ring-0',
+          className,
+        )}
+        {...textFieldProps}
+      />
+    </div>
   );
 };

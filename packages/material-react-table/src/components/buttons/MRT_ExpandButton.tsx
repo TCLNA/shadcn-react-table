@@ -1,17 +1,15 @@
 import { type MouseEvent } from 'react';
-import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import { useTheme } from '@mui/material/styles';
 import {
   type MRT_Row,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { getCommonTooltipProps } from '../../utils/style.utils';
+import { MRT_IconButton, type MRT_IconButtonProps } from './MRT_IconButton';
 import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '../../lib/utils';
 
 export interface MRT_ExpandButtonProps<TData extends MRT_RowData>
-  extends IconButtonProps {
+  extends Omit<MRT_IconButtonProps, 'tooltip'> {
   row: MRT_Row<TData>;
   staticRowIndex?: number;
   table: MRT_TableInstance<TData>;
@@ -21,8 +19,8 @@ export const MRT_ExpandButton = <TData extends MRT_RowData>({
   row,
   staticRowIndex,
   table,
+  ...rest
 }: MRT_ExpandButtonProps<TData>) => {
-  const theme = useTheme();
   const {
     getState,
     options: {
@@ -52,51 +50,46 @@ export const MRT_ExpandButton = <TData extends MRT_RowData>({
 
   const detailPanel = !!renderDetailPanel?.({ row, table });
 
+  // Calculate margin for row depth indentation
+  // Note: RTL detection would need to be handled at a higher level or via CSS
+  const marginLeft = positionExpandColumn === 'last' ? 0 : row.depth * 16;
+  const marginRight = positionExpandColumn === 'last' ? row.depth * 16 : 0;
+
   return (
-    <Tooltip
-      disableHoverListener={!canExpand && !detailPanel}
-      {...getCommonTooltipProps()}
-      title={
-        iconButtonProps?.title ??
-        (isExpanded ? localization.collapse : localization.expand)
-      }
+    <MRT_IconButton
+      aria-label={localization.expand}
+      disabled={!canExpand && !detailPanel}
+      onClick={handleToggleExpand}
+      tooltip={isExpanded ? localization.collapse : localization.expand}
+      density={density}
+      className={cn(
+        !canExpand && !detailPanel && 'opacity-30',
+        iconButtonProps?.className,
+      )}
+      style={{
+        marginLeft: `${marginLeft}px`,
+        marginRight: `${marginRight}px`,
+        ...iconButtonProps?.style,
+      }}
+      {...(iconButtonProps as any)}
+      {...rest}
     >
-      <span>
-        <IconButton
-          aria-label={localization.expand}
-          disabled={!canExpand && !detailPanel}
-          {...iconButtonProps}
-          onClick={handleToggleExpand}
-          sx={(theme) => ({
-            height: density === 'compact' ? '1.75rem' : '2.25rem',
-            opacity: !canExpand && !detailPanel ? 0.3 : 1,
-            [theme.direction === 'rtl' || positionExpandColumn === 'last'
-              ? 'mr'
-              : 'ml']: `${row.depth * 16}px`,
-            width: density === 'compact' ? '1.75rem' : '2.25rem',
-            ...(parseFromValuesOrFunc(iconButtonProps?.sx, theme) as any),
-          })}
-          title={undefined}
-        >
-          {iconButtonProps?.children ?? (
-            <ExpandMoreIcon
-              style={{
-                transform: `rotate(${
-                  !canExpand && !renderDetailPanel
-                    ? positionExpandColumn === 'last' ||
-                      theme.direction === 'rtl'
-                      ? 90
-                      : -90
-                    : isExpanded
-                      ? -180
-                      : 0
-                }deg)`,
-                transition: 'transform 150ms',
-              }}
-            />
-          )}
-        </IconButton>
-      </span>
-    </Tooltip>
+      {iconButtonProps?.children ?? (
+        <ExpandMoreIcon
+          style={{
+            transform: `rotate(${
+              !canExpand && !renderDetailPanel
+                ? positionExpandColumn === 'last'
+                  ? 90
+                  : -90
+                : isExpanded
+                  ? -180
+                  : 0
+            }deg)`,
+            transition: 'transform 150ms',
+          }}
+        />
+      )}
+    </MRT_IconButton>
   );
 };

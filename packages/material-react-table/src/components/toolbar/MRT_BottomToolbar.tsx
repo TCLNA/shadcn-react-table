@@ -1,22 +1,20 @@
-import Box, { type BoxProps } from '@mui/material/Box';
-import { alpha } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { MRT_LinearProgressBar } from './MRT_LinearProgressBar';
 import { MRT_TablePagination } from './MRT_TablePagination';
 import { MRT_ToolbarAlertBanner } from './MRT_ToolbarAlertBanner';
 import { MRT_ToolbarDropZone } from './MRT_ToolbarDropZone';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
-import { getCommonToolbarStyles } from '../../utils/style.utils';
 import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '../../lib/utils';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
-export interface MRT_BottomToolbarProps<TData extends MRT_RowData>
-  extends BoxProps {
+export interface MRT_BottomToolbarProps<TData extends MRT_RowData> {
   table: MRT_TableInstance<TData>;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 export const MRT_BottomToolbar = <TData extends MRT_RowData>({
   table,
-  ...rest
 }: MRT_BottomToolbarProps<TData>) => {
   const {
     getState,
@@ -34,37 +32,37 @@ export const MRT_BottomToolbar = <TData extends MRT_RowData>({
 
   const isMobile = useMediaQuery('(max-width:720px)');
 
-  const toolbarProps = {
-    ...parseFromValuesOrFunc(muiBottomToolbarProps, { table }),
-    ...rest,
-  };
+  const toolbarProps = parseFromValuesOrFunc(muiBottomToolbarProps, { table });
 
   const stackAlertBanner = isMobile || !!renderBottomToolbarCustomActions;
 
   return (
-    <Box
+    <div
       {...toolbarProps}
       ref={(node: HTMLDivElement) => {
         if (node) {
           bottomToolbarRef.current = node;
-          if (toolbarProps?.ref) {
-            // @ts-expect-error
-            toolbarProps.ref.current = node;
+          if ((toolbarProps as any)?.ref) {
+            (toolbarProps as any).ref.current = node;
           }
         }
       }}
-      sx={(theme) => ({
-        ...getCommonToolbarStyles({ table, theme }),
-        bottom: isFullScreen ? '0' : undefined,
-        boxShadow: `0 1px 2px -1px ${alpha(
-          theme.palette.grey[700],
-          0.5,
-        )} inset`,
-        left: 0,
-        position: isFullScreen ? 'fixed' : 'relative',
-        right: 0,
-        ...(parseFromValuesOrFunc(toolbarProps?.sx, theme) as any),
-      })}
+      className={cn(
+        // Common toolbar styles
+        'grid items-start flex-wrap-reverse min-h-[3.5rem] overflow-hidden relative transition-all duration-150 ease-in-out z-[1]',
+        // Background color from theme
+        'bg-background',
+        // Position styles
+        isFullScreen ? 'fixed bottom-0 left-0 right-0' : 'relative',
+        // Box shadow (inset top shadow)
+        'shadow-[0_1px_2px_-1px_rgba(0,0,0,0.2)_inset]',
+        // Custom className from props
+        toolbarProps?.className
+      )}
+      style={{
+        backgroundColor: table.options.mrtTheme?.baseBackgroundColor,
+        ...toolbarProps?.style,
+      }}
     >
       <MRT_LinearProgressBar isTopToolbar={false} table={table} />
       {positionToolbarAlertBanner === 'bottom' && (
@@ -76,36 +74,29 @@ export const MRT_BottomToolbar = <TData extends MRT_RowData>({
       {['both', 'bottom'].includes(positionToolbarDropZone ?? '') && (
         <MRT_ToolbarDropZone table={table} />
       )}
-      <Box
-        sx={{
-          alignItems: 'center',
-          boxSizing: 'border-box',
-          display: 'flex',
-          justifyContent: 'space-between',
-          p: '0.5rem',
-          width: '100%',
-        }}
+      <div
+        className={cn(
+          'flex items-center justify-between p-2 w-full box-border',
+          stackAlertBanner ? 'relative' : 'absolute right-0 top-0'
+        )}
       >
         {renderBottomToolbarCustomActions ? (
           renderBottomToolbarCustomActions({ table })
         ) : (
           <span />
         )}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            position: stackAlertBanner ? 'relative' : 'absolute',
-            right: 0,
-            top: 0,
-          }}
+        <div
+          className={cn(
+            'flex justify-end',
+            stackAlertBanner ? 'relative' : 'absolute right-0 top-0'
+          )}
         >
           {enablePagination &&
             ['both', 'bottom'].includes(positionPagination ?? '') && (
               <MRT_TablePagination position="bottom" table={table} />
             )}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };

@@ -1,6 +1,5 @@
 import { type ReactNode } from 'react';
-import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../components/ui/tooltip';
 import { MRT_ExpandAllButton } from '../../components/buttons/MRT_ExpandAllButton';
 import { MRT_ExpandButton } from '../../components/buttons/MRT_ExpandButton';
 import {
@@ -9,7 +8,6 @@ import {
   type MRT_StatefulTableOptions,
 } from '../../types';
 import { defaultDisplayColumnProps } from '../../utils/displayColumn.utils';
-import { getCommonTooltipProps } from '../../utils/style.utils';
 
 export const getMRT_RowExpandColumnDef = <TData extends MRT_RowData>(
   tableOptions: MRT_StatefulTableOptions<TData>,
@@ -36,16 +34,18 @@ export const getMRT_RowExpandColumnDef = <TData extends MRT_RowData>(
       const subRowsLength = row.subRows?.length;
       if (groupedColumnMode === 'remove' && row.groupingColumnId) {
         return (
-          <Stack alignItems="center" flexDirection="row" gap="0.25rem">
+          <div className="flex items-center flex-row gap-1">
             <MRT_ExpandButton {...expandButtonProps} />
-            <Tooltip
-              {...getCommonTooltipProps('right')}
-              title={table.getColumn(row.groupingColumnId).columnDef.header}
-            >
-              <span>{row.groupingValue as ReactNode}</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>{row.groupingValue as ReactNode}</span>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {table.getColumn(row.groupingColumnId).columnDef.header}
+              </TooltipContent>
             </Tooltip>
             {!!subRowsLength && <span>({subRowsLength})</span>}
-          </Stack>
+          </div>
         );
       } else {
         return (

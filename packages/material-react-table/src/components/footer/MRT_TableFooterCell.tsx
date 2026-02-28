@@ -1,5 +1,4 @@
-import TableCell, { type TableCellProps } from '@mui/material/TableCell';
-import { useTheme } from '@mui/material/styles';
+import { TableCell } from '../ui/table';
 import {
   type MRT_Header,
   type MRT_RowData,
@@ -8,6 +7,29 @@ import {
 import { getCommonMRTCellStyles } from '../../utils/style.utils';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { cellKeyboardShortcuts } from '../../utils/cell.utils';
+import { cn } from '../../lib/utils';
+
+// TableCellProps type for compatibility
+interface TableCellProps {
+  align?: 'left' | 'center' | 'right';
+  colSpan?: number;
+  className?: string;
+  children?: React.ReactNode;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLTableCellElement>) => void;
+}
+
+// Default theme for compatibility
+const defaultTheme = {
+  direction: 'ltr' as 'ltr' | 'rtl',
+  palette: {
+    mode: 'light' as const,
+    primary: { main: 'hsl(var(--primary))' },
+    background: { default: 'hsl(var(--background))' },
+    warning: { dark: 'hsl(var(--destructive))', light: 'hsl(var(--muted))' },
+    grey: { 700: 'hsl(var(--muted-foreground))' },
+    common: { white: 'hsl(var(--background))', black: 'hsl(var(--foreground))' },
+  },
+};
 
 export interface MRT_TableFooterCellProps<TData extends MRT_RowData>
   extends TableCellProps {
@@ -22,7 +44,7 @@ export const MRT_TableFooterCell = <TData extends MRT_RowData>({
   table,
   ...rest
 }: MRT_TableFooterCellProps<TData>) => {
-  const theme = useTheme();
+  const theme = defaultTheme;
   const {
     getState,
     options: {
@@ -57,6 +79,13 @@ export const MRT_TableFooterCell = <TData extends MRT_RowData>({
     });
   };
 
+  const padding =
+    density === 'compact'
+      ? '0.5rem'
+      : density === 'comfortable'
+        ? '1rem'
+        : '1.5rem';
+
   return (
     <TableCell
       align={
@@ -70,18 +99,12 @@ export const MRT_TableFooterCell = <TData extends MRT_RowData>({
       data-index={staticColumnIndex}
       data-pinned={!!isColumnPinned || undefined}
       tabIndex={enableKeyboardShortcuts ? 0 : undefined}
-      variant="footer"
-      {...tableCellProps}
-      onKeyDown={handleKeyDown}
-      sx={(theme) => ({
-        fontWeight: 'bold',
-        p:
-          density === 'compact'
-            ? '0.5rem'
-            : density === 'comfortable'
-              ? '1rem'
-              : '1.5rem',
-        verticalAlign: 'top',
+      className={cn(
+        "font-bold align-top",
+        tableCellProps?.className
+      )}
+      style={{
+        padding,
         ...getCommonMRTCellStyles({
           column,
           header: footer,
@@ -89,8 +112,9 @@ export const MRT_TableFooterCell = <TData extends MRT_RowData>({
           tableCellProps,
           theme,
         }),
-        ...(parseFromValuesOrFunc(tableCellProps?.sx, theme) as any),
-      })}
+      }}
+      {...tableCellProps}
+      onKeyDown={handleKeyDown}
     >
       {tableCellProps.children ??
         (footer.isPlaceholder

@@ -1,6 +1,6 @@
-import Box, { type BoxProps } from '@mui/material/Box';
+import { type HTMLAttributes } from 'react';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
-import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '../../lib/utils';
 import { MRT_ShowHideColumnsButton } from '../buttons/MRT_ShowHideColumnsButton';
 import { MRT_ToggleDensePaddingButton } from '../buttons/MRT_ToggleDensePaddingButton';
 import { MRT_ToggleFiltersButton } from '../buttons/MRT_ToggleFiltersButton';
@@ -8,7 +8,7 @@ import { MRT_ToggleFullScreenButton } from '../buttons/MRT_ToggleFullScreenButto
 import { MRT_ToggleGlobalFilterButton } from '../buttons/MRT_ToggleGlobalFilterButton';
 
 export interface MRT_ToolbarInternalButtonsProps<TData extends MRT_RowData>
-  extends BoxProps {
+  extends HTMLAttributes<HTMLDivElement> {
   table: MRT_TableInstance<TData>;
 }
 
@@ -33,14 +33,12 @@ export const MRT_ToolbarInternalButtons = <TData extends MRT_RowData>({
   } = table;
 
   return (
-    <Box
+    <div
       {...rest}
-      sx={(theme) => ({
-        alignItems: 'center',
-        display: 'flex',
-        zIndex: 3,
-        ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-      })}
+      className={cn(
+        'flex items-center z-[3]',
+        rest?.className,
+      )}
     >
       {renderToolbarInternalActions?.({
         table,
@@ -67,6 +65,6 @@ export const MRT_ToolbarInternalButtons = <TData extends MRT_RowData>({
           )}
         </>
       )}
-    </Box>
+    </div>
   );
 };
