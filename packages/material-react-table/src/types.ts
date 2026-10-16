@@ -63,46 +63,49 @@ export type SelectProps = React.ComponentPropsWithoutRef<
 export type ProgressProps = React.ComponentPropsWithoutRef<
   typeof ProgressPrimitive.Root
 >;
-export type SkeletonProps = React.HTMLAttributes<HTMLDivElement>;
-export type SliderProps = React.HTMLAttributes<HTMLDivElement>;
-export type TableProps = React.HTMLAttributes<HTMLTableElement>;
-export type TableBodyProps = React.HTMLAttributes<HTMLTableSectionElement>;
-export type TableCellProps = React.TdHTMLAttributes<HTMLTableCellElement>;
-export type TableContainerProps = React.HTMLAttributes<HTMLDivElement>;
-export type TableFooterProps = React.HTMLAttributes<HTMLTableSectionElement>;
-export type TableHeadProps = React.HTMLAttributes<HTMLTableSectionElement>;
-export type TableHeaderProps = React.HTMLAttributes<HTMLTableSectionElement>;
-export type TableRowProps = React.HTMLAttributes<HTMLTableRowElement>;
-export type DatePickerProps = React.ComponentPropsWithoutRef<typeof Calendar>;
-export type DateTimePickerProps = React.ComponentPropsWithoutRef<typeof Calendar>;
-export type TimePickerProps = React.HTMLAttributes<HTMLDivElement>;
+// MUI prop compatibility - accepts unknown MUI props without type errors
+type SxCompat = { sx?: any; variant?: string; component?: any; select?: boolean; [key: string]: any };
+
+export type SkeletonProps = React.HTMLAttributes<HTMLDivElement> & SxCompat;
+export type SliderProps = React.HTMLAttributes<HTMLDivElement> & SxCompat;
+export type TableProps = React.HTMLAttributes<HTMLTableElement> & SxCompat;
+export type TableBodyProps = React.HTMLAttributes<HTMLTableSectionElement> & SxCompat;
+export type TableCellProps = React.TdHTMLAttributes<HTMLTableCellElement> & SxCompat;
+export type TableContainerProps = React.HTMLAttributes<HTMLDivElement> & SxCompat;
+export type TableFooterProps = React.HTMLAttributes<HTMLTableSectionElement> & SxCompat;
+export type TableHeadProps = React.HTMLAttributes<HTMLTableSectionElement> & SxCompat;
+export type TableHeaderProps = React.HTMLAttributes<HTMLTableSectionElement> & SxCompat;
+export type TableRowProps = React.HTMLAttributes<HTMLTableRowElement> & SxCompat;
+export type DatePickerProps = React.ComponentPropsWithoutRef<typeof Calendar> & SxCompat;
+export type DateTimePickerProps = React.ComponentPropsWithoutRef<typeof Calendar> & SxCompat;
+export type TimePickerProps = React.HTMLAttributes<HTMLDivElement> & SxCompat;
 
 // TextField equivalent (Input component)
-export type TextFieldProps = InputProps;
+export type TextFieldProps = Omit<InputProps, 'size'> & SxCompat & { size?: string | number };
 
 // IconButton equivalent (Button with variant="ghost" and size="icon")
-export type IconButtonProps = ButtonProps;
+export type IconButtonProps = ButtonProps & SxCompat;
 
 // LinearProgress equivalent (Progress component)
-export type LinearProgressProps = ProgressProps;
+export type LinearProgressProps = ProgressProps & SxCompat;
 
 // CircularProgress equivalent (Progress component or custom spinner)
-export type CircularProgressProps = ProgressProps & { Component?: ReactNode };
+export type CircularProgressProps = ProgressProps & { Component?: ReactNode } & SxCompat;
 
 // Pagination equivalent (custom pagination component)
-export type PaginationProps = React.HTMLAttributes<HTMLDivElement>;
+export type PaginationProps = React.HTMLAttributes<HTMLDivElement> & SxCompat;
 
 // Box equivalent (div with className)
-export type BoxProps = React.HTMLAttributes<HTMLDivElement>;
+export type BoxProps = React.HTMLAttributes<HTMLDivElement> & SxCompat;
 
 // Paper equivalent (div with className)
-export type PaperProps = React.HTMLAttributes<HTMLDivElement>;
+export type PaperProps = React.HTMLAttributes<HTMLDivElement> & SxCompat;
 
 // Chip equivalent (span or div with className)
-export type ChipProps = React.HTMLAttributes<HTMLSpanElement>;
+export type ChipProps = React.HTMLAttributes<HTMLSpanElement> & SxCompat;
 
 // Radio equivalent (uses Checkbox primitive)
-export type RadioProps = CheckboxProps;
+export type RadioProps = CheckboxProps & SxCompat;
 
 // Autocomplete equivalent (Command component)
 export type AutocompleteProps<T = any, Multiple = any, DisableClearable = any, FreeSolo = any> = {

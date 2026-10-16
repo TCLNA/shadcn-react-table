@@ -1,23 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
-import FormHelperText from '@mui/material/FormHelperText';
-import Slider, { type SliderProps } from '@mui/material/Slider';
-import Stack from '@mui/material/Stack';
+import { Slider } from '../ui/slider';
 import {
   type MRT_Header,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '../../lib/utils';
 
-export interface MRT_FilterRangeSliderProps<TData extends MRT_RowData>
-  extends SliderProps {
+export interface MRT_FilterRangeSliderProps<TData extends MRT_RowData> {
   header: MRT_Header<TData>;
   table: MRT_TableInstance<TData>;
+  className?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  disabled?: boolean;
 }
 
 export const MRT_FilterRangeSlider = <TData extends MRT_RowData>({
   header,
   table,
+  className,
   ...rest
 }: MRT_FilterRangeSliderProps<TData>) => {
   const {
@@ -73,15 +77,16 @@ export const MRT_FilterRangeSlider = <TData extends MRT_RowData>({
   }, [columnFilterValue, min, max]);
 
   return (
-    <Stack>
+    <div className="flex flex-col gap-1">
       <Slider
-        disableSwap
-        max={max}
         min={min}
-        onChange={(_event, values) => {
+        max={max}
+        step={sliderProps.step ?? 1}
+        value={filterValues}
+        onValueChange={(values) => {
           setFilterValues(values as [number, number]);
         }}
-        onChangeCommitted={(_event, value) => {
+        onValueCommit={(value) => {
           if (Array.isArray(value)) {
             if (value[0] <= min && value[1] >= max) {
               //if the user has selected the entire range, remove the filter
@@ -92,41 +97,25 @@ export const MRT_FilterRangeSlider = <TData extends MRT_RowData>({
           }
         }}
         onKeyDown={handleKeyDown}
-        value={filterValues}
-        valueLabelDisplay="auto"
-        {...sliderProps}
-        slotProps={{
-          input: {
-            ref: (node) => {
-              if (node) {
-                filterInputRefs.current![`${column.id}-0`] = node;
-                // @ts-expect-error
-                if (sliderProps?.slotProps?.input?.ref) {
-                  //@ts-expect-error
-                  sliderProps.slotProps.input.ref = node;
-                }
-              }
-            },
-          },
-        }}
-        sx={(theme) => ({
-          m: 'auto',
+        disabled={sliderProps.disabled}
+        className={cn(
+          'mx-auto px-1 w-full',
+          showChangeModeButton ? 'mt-1.5' : 'mt-2.5',
+          className,
+          sliderProps.className,
+        )}
+        style={{
           minWidth: `${column.getSize() - 50}px`,
-          mt: !showChangeModeButton ? '10px' : '6px',
-          px: '4px',
           width: 'calc(100% - 8px)',
-          ...(parseFromValuesOrFunc(sliderProps?.sx, theme) as any),
-        })}
+        }}
+        ref={(node) => {
+          if (node && filterInputRefs.current) {
+            filterInputRefs.current[`${column.id}-0`] = node as any;
+          }
+        }}
       />
-      {showChangeModeButton ? (
-        <FormHelperText
-          sx={{
-            fontSize: '0.75rem',
-            lineHeight: '0.8rem',
-            m: '-3px -6px',
-            whiteSpace: 'nowrap',
-          }}
-        >
+      {showChangeModeButton && (
+        <p className="text-xs leading-tight -mx-1.5 -my-0.5 whitespace-nowrap text-muted-foreground">
           {localization.filterMode.replace(
             '{filterType}',
             localization[
@@ -136,8 +125,8 @@ export const MRT_FilterRangeSlider = <TData extends MRT_RowData>({
               }` as keyof typeof localization
             ],
           )}
-        </FormHelperText>
-      ) : null}
-    </Stack>
+        </p>
+      )}
+    </div>
   );
 };

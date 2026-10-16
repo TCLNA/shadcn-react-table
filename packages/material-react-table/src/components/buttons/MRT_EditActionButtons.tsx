@@ -1,32 +1,29 @@
-import Box, { type BoxProps } from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import {
   type MRT_Row,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { parseFromValuesOrFunc } from '../../utils/utils';
+import { MRT_Button } from './MRT_Button';
+import { MRT_IconButton } from './MRT_IconButton';
+import { cn } from '../../lib/utils';
 
-export interface MRT_EditActionButtonsProps<TData extends MRT_RowData>
-  extends BoxProps {
+export interface MRT_EditActionButtonsProps<TData extends MRT_RowData> {
   row: MRT_Row<TData>;
   table: MRT_TableInstance<TData>;
   variant?: 'icon' | 'text';
+  className?: string;
 }
 
 export const MRT_EditActionButtons = <TData extends MRT_RowData>({
   row,
   table,
   variant = 'icon',
-  ...rest
+  className,
 }: MRT_EditActionButtonsProps<TData>) => {
   const {
     getState,
     options: {
-      icons: { CancelIcon, SaveIcon },
+      icons: { CancelIcon, SaveIcon, CircularProgressIcon },
       localization,
       onCreatingRowCancel,
       onCreatingRowSave,
@@ -84,51 +81,54 @@ export const MRT_EditActionButtons = <TData extends MRT_RowData>({
   };
 
   return (
-    <Box
+    <div
       onClick={(e) => e.stopPropagation()}
-      sx={(theme) => ({
-        display: 'flex',
-        gap: '0.75rem',
-        ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-      })}
+      className={cn('flex gap-3', className)}
     >
       {variant === 'icon' ? (
         <>
-          <Tooltip title={localization.cancel}>
-            <IconButton aria-label={localization.cancel} onClick={handleCancel}>
-              <CancelIcon />
-            </IconButton>
-          </Tooltip>
+          <MRT_IconButton
+            aria-label={localization.cancel}
+            onClick={handleCancel}
+            tooltip={localization.cancel}
+          >
+            <CancelIcon />
+          </MRT_IconButton>
           {((isCreating && onCreatingRowSave) ||
             (isEditing && onEditingRowSave)) && (
-            <Tooltip title={localization.save}>
-              <IconButton
-                aria-label={localization.save}
-                color="info"
-                disabled={isSaving}
-                onClick={handleSubmitRow}
-              >
-                {isSaving ? <CircularProgress size={18} /> : <SaveIcon />}
-              </IconButton>
-            </Tooltip>
+            <MRT_IconButton
+              aria-label={localization.save}
+              disabled={isSaving}
+              onClick={handleSubmitRow}
+              tooltip={localization.save}
+              className="text-info"
+            >
+              {isSaving ? (
+                <CircularProgressIcon className="h-[18px] w-[18px] animate-spin" />
+              ) : (
+                <SaveIcon />
+              )}
+            </MRT_IconButton>
           )}
         </>
       ) : (
         <>
-          <Button onClick={handleCancel} sx={{ minWidth: '100px' }}>
+          <MRT_Button onClick={handleCancel} className="min-w-[100px]">
             {localization.cancel}
-          </Button>
-          <Button
+          </MRT_Button>
+          <MRT_Button
             disabled={isSaving}
             onClick={handleSubmitRow}
-            sx={{ minWidth: '100px' }}
-            variant="contained"
+            variant="default"
+            className="min-w-[100px]"
           >
-            {isSaving && <CircularProgress color="inherit" size={18} />}
+            {isSaving && (
+              <CircularProgressIcon className="h-[18px] w-[18px] animate-spin" />
+            )}
             {localization.save}
-          </Button>
+          </MRT_Button>
         </>
       )}
-    </Box>
+    </div>
   );
 };

@@ -110,7 +110,7 @@ const Example = () => {
         accessorFn: (row) => new Date(row.lastLogin),
         id: 'lastLogin',
         header: 'Last Login',
-        Cell: ({ cell }) => new Date(cell.getValue<Date>()).toLocaleString(),
+        Cell: ({ cell }) => new Date((cell.getValue() as Date)).toLocaleString(),
         filterFn: 'greaterThan',
         filterVariant: 'date',
         enableGlobalFilter: false,

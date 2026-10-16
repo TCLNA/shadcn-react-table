@@ -1,7 +1,6 @@
 import { memo, useMemo } from 'react';
 import { type VirtualItem } from '@tanstack/react-virtual';
-import TableBody, { type TableBodyProps } from '@mui/material/TableBody';
-import Typography from '@mui/material/Typography';
+import { TableBody } from '../ui/table';
 import { MRT_TableBodyRow, Memo_MRT_TableBodyRow } from './MRT_TableBodyRow';
 import { useMRT_RowVirtualizer } from '../../hooks/useMRT_RowVirtualizer';
 import { useMRT_Rows } from '../../hooks/useMRT_Rows';
@@ -12,9 +11,11 @@ import {
   type MRT_TableInstance,
 } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '../../lib/utils';
+import type { HTMLAttributes } from 'react';
 
 export interface MRT_TableBodyProps<TData extends MRT_RowData>
-  extends TableBodyProps {
+  extends HTMLAttributes<HTMLTableSectionElement> {
   columnVirtualizer?: MRT_ColumnVirtualizer;
   table: MRT_TableInstance<TData>;
 }
@@ -82,13 +83,15 @@ export const MRT_TableBody = <TData extends MRT_RowData>({
         getIsSomeRowsPinned('top') && (
           <TableBody
             {...tableBodyProps}
-            sx={(theme) => ({
-              display: layoutMode?.startsWith('grid') ? 'grid' : undefined,
-              position: 'sticky',
+            className={cn(
+              layoutMode?.startsWith('grid') && 'grid',
+              'sticky z-[1]',
+              tableBodyProps?.className
+            )}
+            style={{
               top: tableHeadHeight - 1,
-              zIndex: 1,
-              ...(parseFromValuesOrFunc(tableBodyProps?.sx, theme) as any),
-            })}
+              ...tableBodyProps?.style,
+            }}
           >
             {getTopRows().map((row, staticRowIndex) => {
               const props = {
@@ -106,15 +109,18 @@ export const MRT_TableBody = <TData extends MRT_RowData>({
         )}
       <TableBody
         {...tableBodyProps}
-        sx={(theme) => ({
-          display: layoutMode?.startsWith('grid') ? 'grid' : undefined,
+        className={cn(
+          layoutMode?.startsWith('grid') && 'grid',
+          'relative',
+          !rows.length && 'min-h-[100px]',
+          tableBodyProps?.className
+        )}
+        style={{
           height: rowVirtualizer
             ? `${rowVirtualizer.getTotalSize()}px`
             : undefined,
-          minHeight: !rows.length ? '100px' : undefined,
-          position: 'relative',
-          ...(parseFromValuesOrFunc(tableBodyProps?.sx, theme) as any),
-        })}
+          ...tableBodyProps?.style,
+        }}
       >
         {tableBodyProps?.children ??
           (!rows.length ? (
@@ -130,22 +136,18 @@ export const MRT_TableBody = <TData extends MRT_RowData>({
                 }}
               >
                 {renderEmptyRowsFallback?.({ table }) ?? (
-                  <Typography
-                    sx={{
-                      color: 'text.secondary',
-                      fontStyle: 'italic',
+                  <div
+                    className="py-8 text-center w-full italic text-muted-foreground"
+                    style={{
                       maxWidth: `min(100vw, ${
                         tablePaperRef.current?.clientWidth ? tablePaperRef.current?.clientWidth + "px" : "100%"
                       })`,
-                      py: '2rem',
-                      textAlign: 'center',
-                      width: '100%',
                     }}
                   >
                     {globalFilter || columnFilters.length
                       ? localization.noResultsFound
                       : localization.noRecordsToDisplay}
-                  </Typography>
+                  </div>
                 )}
               </td>
             </tr>
@@ -189,13 +191,15 @@ export const MRT_TableBody = <TData extends MRT_RowData>({
         getIsSomeRowsPinned('bottom') && (
           <TableBody
             {...tableBodyProps}
-            sx={(theme) => ({
+            className={cn(
+              layoutMode?.startsWith('grid') && 'grid',
+              'sticky z-[1]',
+              tableBodyProps?.className
+            )}
+            style={{
               bottom: tableFooterHeight - 1,
-              display: layoutMode?.startsWith('grid') ? 'grid' : undefined,
-              position: 'sticky',
-              zIndex: 1,
-              ...(parseFromValuesOrFunc(tableBodyProps?.sx, theme) as any),
-            })}
+              ...tableBodyProps?.style,
+            }}
           >
             {getBottomRows().map((row, staticRowIndex) => {
               const props = {

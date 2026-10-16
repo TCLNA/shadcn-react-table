@@ -1,13 +1,11 @@
 import { type DragEventHandler } from 'react';
-import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
-import { getCommonTooltipProps } from '../../utils/style.utils';
-import { parseFromValuesOrFunc } from '../../utils/utils';
+import { MRT_IconButton, type MRT_IconButtonProps } from './MRT_IconButton';
+import { cn } from '../../lib/utils';
 
 export interface MRT_GrabHandleButtonProps<TData extends MRT_RowData>
-  extends IconButtonProps {
-  iconButtonProps?: IconButtonProps;
+  extends Omit<MRT_IconButtonProps, 'tooltip' | 'size'> {
+  iconButtonProps?: MRT_IconButtonProps;
   location?: 'column' | 'row';
   onDragEnd: DragEventHandler<HTMLButtonElement>;
   onDragStart: DragEventHandler<HTMLButtonElement>;
@@ -27,39 +25,26 @@ export const MRT_GrabHandleButton = <TData extends MRT_RowData>({
   } = table;
 
   return (
-    <Tooltip
-      {...getCommonTooltipProps('top')}
-      title={rest?.title ?? localization.move}
+    <MRT_IconButton
+      aria-label={localization.move}
+      draggable="true"
+      size="small"
+      tooltip={localization.move}
+      tooltipPlacement="top"
+      className={cn(
+        'cursor-grab p-0.5 -mx-0.5 transition-all duration-150',
+        'hover:bg-transparent hover:opacity-100',
+        'active:cursor-grabbing',
+        location === 'row' ? 'opacity-100' : 'opacity-50',
+        rest.className,
+      )}
+      {...rest}
+      onClick={(e) => {
+        e.stopPropagation();
+        rest?.onClick?.(e);
+      }}
     >
-      <IconButton
-        aria-label={rest.title ?? localization.move}
-        disableRipple
-        draggable="true"
-        size="small"
-        {...rest}
-        onClick={(e) => {
-          e.stopPropagation();
-          rest?.onClick?.(e);
-        }}
-        sx={(theme) => ({
-          '&:active': {
-            cursor: 'grabbing',
-          },
-          '&:hover': {
-            backgroundColor: 'transparent',
-            opacity: 1,
-          },
-          cursor: 'grab',
-          m: '0 -0.1rem',
-          opacity: location === 'row' ? 1 : 0.5,
-          p: '2px',
-          transition: 'all 150ms ease-in-out',
-          ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-        })}
-        title={undefined}
-      >
-        <DragHandleIcon />
-      </IconButton>
-    </Tooltip>
+      <DragHandleIcon />
+    </MRT_IconButton>
   );
 };

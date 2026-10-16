@@ -53,51 +53,51 @@ export const MRT_TablePaper = <TData extends MRT_RowData>({
 
   return (
     <div
-      onKeyDown={(e) => e.key === 'Escape' && table.setIsFullScreen(false)}
-      {...paperProps}
-      ref={(ref: HTMLDivElement) => {
-        tablePaperRef.current = ref;
-        if ((paperProps as any)?.ref) {
-          (paperProps as any).ref.current = ref;
-        }
-      }}
-      className={cn(
-        'rounded-lg border bg-card overflow-hidden transition-all duration-100',
-        shadowClass,
-        className,
-        paperProps?.className
-      )}
-      style={{
-        backgroundColor: baseBackgroundColor,
-        ...(isFullScreen
-          ? {
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              width: '100dvw',
-              height: '100dvh',
-              maxWidth: '100dvw',
-              maxHeight: '100dvh',
-              margin: 0,
-              padding: 0,
-              zIndex: 1300, // equivalent to MUI modal z-index
-            }
-          : {}),
-        ...style,
-        ...paperProps?.style,
-      }}
-    >
-      {enableTopToolbar &&
-        (parseFromValuesOrFunc(renderTopToolbar, { table }) ?? (
-          <MRT_TopToolbar table={table} />
-        ))}
-      <MRT_TableContainer table={table} />
-      {enableBottomToolbar &&
-        (parseFromValuesOrFunc(renderBottomToolbar, { table }) ?? (
-          <MRT_BottomToolbar table={table} />
-        ))}
+        onKeyDown={(e) => e.key === 'Escape' && table.setIsFullScreen(false)}
+        {...paperProps}
+        ref={(ref: HTMLDivElement) => {
+          tablePaperRef.current = ref;
+          if ((paperProps as any)?.ref) {
+            (paperProps as any).ref.current = ref;
+          }
+        }}
+        className={cn(
+          'rounded-lg border bg-card overflow-hidden transition-all duration-100',
+          shadowClass,
+          className,
+          paperProps?.className
+        )}
+        style={{
+          backgroundColor: baseBackgroundColor,
+          ...(isFullScreen
+            ? {
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100dvw',
+                height: '100dvh',
+                maxWidth: '100dvw',
+                maxHeight: '100dvh',
+                margin: 0,
+                padding: 0,
+                zIndex: 1300, // equivalent to MUI modal z-index
+              }
+            : {}),
+          ...style,
+          ...paperProps?.style,
+        }}
+      >
+        {enableTopToolbar &&
+          (parseFromValuesOrFunc(renderTopToolbar, { table }) ?? (
+            <MRT_TopToolbar table={table} />
+          ))}
+        <MRT_TableContainer table={table} />
+        {enableBottomToolbar &&
+          (parseFromValuesOrFunc(renderBottomToolbar, { table }) ?? (
+            <MRT_BottomToolbar table={table} />
+          ))}
     </div>
   );
 };

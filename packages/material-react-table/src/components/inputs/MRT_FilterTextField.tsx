@@ -1,27 +1,35 @@
 import {
   type ChangeEvent,
   type MouseEvent,
-  SyntheticEvent,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from 'react';
-import Autocomplete, {
-  AutocompleteInputChangeReason,
-} from '@mui/material/Autocomplete';
-import Box from '@mui/material/Box';
-import Checkbox from '@mui/material/Checkbox';
-import Chip from '@mui/material/Chip';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import MenuItem from '@mui/material/MenuItem';
-import TextField, { type TextFieldProps } from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
-import { debounce } from '@mui/material/utils';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { X, Check } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
+import { Input } from '../ui/input';
+import { Checkbox } from '../ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '../ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { MRT_IconButton } from '../buttons/MRT_IconButton';
+import { MRT_DatePicker } from './MRT_DatePicker';
+import { MRT_DateRangePicker } from './MRT_DateRangePicker';
+import { cn } from '../../lib/utils';
 import {
   type DropdownOption,
   type MRT_Header,
@@ -35,8 +43,19 @@ import {
 import { getValueAndLabel, parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_FilterOptionMenu } from '../menus/MRT_FilterOptionMenu';
 
-export interface MRT_FilterTextFieldProps<TData extends MRT_RowData>
-  extends TextFieldProps<'standard'> {
+// Debounce utility function
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  return (...args: Parameters<T>) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+export interface MRT_FilterTextFieldProps<TData extends MRT_RowData> {
   header: MRT_Header<TData>;
   rangeFilterIndex?: number;
   table: MRT_TableInstance<TData>;
@@ -46,7 +65,6 @@ export const MRT_FilterTextField = <TData extends MRT_RowData>({
   header,
   rangeFilterIndex,
   table,
-  ...rest
 }: MRT_FilterTextFieldProps<TData>) => {
   const {
     options: {
@@ -54,11 +72,7 @@ export const MRT_FilterTextField = <TData extends MRT_RowData>({
       icons: { CloseIcon, FilterListIcon },
       localization,
       manualFiltering,
-      muiFilterAutocompleteProps,
-      muiFilterDatePickerProps,
-      muiFilterDateTimePickerProps,
       muiFilterTextFieldProps,
-      muiFilterTimePickerProps,
     },
     refs: { filterInputRefs },
     setColumnFilterFns,
@@ -72,28 +86,7 @@ export const MRT_FilterTextField = <TData extends MRT_RowData>({
   const textFieldProps = {
     ...parseFromValuesOrFunc(muiFilterTextFieldProps, args),
     ...parseFromValuesOrFunc(columnDef.muiFilterTextFieldProps, args),
-    ...rest,
   };
-
-  const autocompleteProps = {
-    ...parseFromValuesOrFunc(muiFilterAutocompleteProps, args),
-    ...parseFromValuesOrFunc(columnDef.muiFilterAutocompleteProps, args),
-  };
-
-  const datePickerProps = {
-    ...parseFromValuesOrFunc(muiFilterDatePickerProps, args),
-    ...parseFromValuesOrFunc(columnDef.muiFilterDatePickerProps, args),
-  } as any;
-
-  const dateTimePickerProps = {
-    ...parseFromValuesOrFunc(muiFilterDateTimePickerProps, args),
-    ...parseFromValuesOrFunc(columnDef.muiFilterDateTimePickerProps, args),
-  } as any;
-
-  const timePickerProps = {
-    ...parseFromValuesOrFunc(muiFilterTimePickerProps, args),
-    ...parseFromValuesOrFunc(columnDef.muiFilterTimePickerProps, args),
-  } as any;
 
   const {
     allowedColumnFilterOptions,
@@ -158,6 +151,7 @@ export const MRT_FilterTextField = <TData extends MRT_RowData>({
         ? ((column.getFilterValue() || null) as DropdownOption | null)
         : null,
     );
+  const [autocompleteOpen, setAutocompleteOpen] = useState(false);
 
   const handleChangeDebounced = useCallback(
     debounce(
@@ -193,19 +187,6 @@ export const MRT_FilterTextField = <TData extends MRT_RowData>({
     textFieldProps?.onChange?.(event);
   };
 
-  const handleAutocompleteInputChange = (
-    _event: SyntheticEvent,
-    newValue: string,
-    _reason: AutocompleteInputChangeReason,
-  ) => {
-    handleChange(newValue);
-  };
-
-  const handleAutocompleteChange = (newValue: DropdownOption | null) => {
-    setAutocompleteValue(newValue);
-    handleChangeDebounced(getValueAndLabel(newValue).value);
-  };
-
   const handleClear = () => {
     if (isMultiSelectFilter) {
       setFilterValue([]);
@@ -220,9 +201,6 @@ export const MRT_FilterTextField = <TData extends MRT_RowData>({
     } else if (isAutocompleteFilter) {
       setAutocompleteValue(null);
       setFilterValue('');
-      // when using 'autocomplete' this function is called only inside effect and only if the filterValue === undefined
-      // so the following call is excessive; should be uncommented if the handleClear becomes part of the Autocomplete component callbacks
-      // column.setFilterValue(undefined)
     } else {
       setFilterValue('');
       column.setFilterValue(undefined);
@@ -264,316 +242,434 @@ export const MRT_FilterTextField = <TData extends MRT_RowData>({
     );
   }
 
-  const endAdornment =
-    !isAutocompleteFilter && !isDateFilter && !filterChipLabel ? (
-      <InputAdornment
-        position="end"
-        sx={{
-          mr: isSelectFilter || isMultiSelectFilter ? '20px' : undefined,
-          visibility: (filterValue?.length ?? 0) > 0 ? 'visible' : 'hidden',
-        }}
-      >
-        <Tooltip placement="right" title={localization.clearFilter ?? ''}>
-          <span>
-            <IconButton
-              aria-label={localization.clearFilter}
-              disabled={!filterValue?.toString()?.length}
-              onClick={handleClear}
-              size="small"
-              sx={{
-                height: '2rem',
-                transform: 'scale(0.9)',
-                width: '2rem',
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </span>
-        </Tooltip>
-      </InputAdornment>
-    ) : null;
+  const minWidth = isDateFilter
+    ? 'min-w-[160px]'
+    : enableColumnFilterModes && rangeFilterIndex === 0
+      ? 'min-w-[110px]'
+      : isRangeFilter
+        ? 'min-w-[100px]'
+        : !filterChipLabel
+          ? 'min-w-[120px]'
+          : 'min-w-auto';
 
-  const startAdornment = showChangeModeButton ? (
-    <InputAdornment position="start">
-      <Tooltip title={localization.changeFilterMode}>
-        <span>
-          <IconButton
-            aria-label={localization.changeFilterMode}
-            onClick={handleFilterMenuOpen}
-            size="small"
-            sx={{ height: '1.75rem', width: '1.75rem' }}
-          >
-            <FilterListIcon />
-          </IconButton>
-        </span>
-      </Tooltip>
-      {filterChipLabel && (
-        <Chip label={filterChipLabel} onDelete={handleClearEmptyFilterChip} />
-      )}
-    </InputAdornment>
-  ) : null;
-
-  const commonTextFieldProps: TextFieldProps<any> = {
-    fullWidth: true,
-    helperText: showChangeModeButton ? (
-      <label>
-        {localization.filterMode.replace(
-          '{filterType}',
-          localization[
-            `filter${
-              currentFilterOption?.charAt(0)?.toUpperCase() +
-              currentFilterOption?.slice(1)
-            }` as keyof typeof localization
-          ],
-        )}
-      </label>
-    ) : null,
-    inputRef: (inputRef) => {
-      filterInputRefs.current![`${column.id}-${rangeFilterIndex ?? 0}`] =
-        inputRef;
-      if (textFieldProps.inputRef) {
-        textFieldProps.inputRef = inputRef;
-      }
-    },
-    margin: 'none',
-    placeholder:
-      filterChipLabel || isSelectFilter || isMultiSelectFilter
-        ? undefined
-        : filterPlaceholder,
-    variant: 'standard',
-    ...textFieldProps,
-    slotProps: {
-      ...textFieldProps.slotProps,
-      formHelperText: {
-        sx: {
-          fontSize: '0.75rem',
-          lineHeight: '0.8rem',
-          whiteSpace: 'nowrap',
-        },
-        ...textFieldProps.slotProps?.formHelperText,
-      },
-      input: endAdornment //hack because mui looks for presence of endAdornment key instead of undefined
-        ? { endAdornment, startAdornment, ...textFieldProps.slotProps?.input }
-        : { startAdornment, ...textFieldProps.slotProps?.input },
-      htmlInput: {
-        'aria-label': filterPlaceholder,
-        autoComplete: 'off',
-        disabled: !!filterChipLabel,
-        sx: {
-          textOverflow: 'ellipsis',
-          width: filterChipLabel ? 0 : undefined,
-        },
-        title: filterPlaceholder,
-        ...textFieldProps.slotProps?.htmlInput,
-      },
-    },
-    onKeyDown: (e) => {
-      e.stopPropagation();
-      textFieldProps.onKeyDown?.(e);
-    },
-    sx: (theme) => ({
-      minWidth: isDateFilter
-        ? '160px'
-        : enableColumnFilterModes && rangeFilterIndex === 0
-          ? '110px'
-          : isRangeFilter
-            ? '100px'
-            : !filterChipLabel
-              ? '120px'
-              : 'auto',
-      mx: '-2px',
-      p: 0,
-      width: 'calc(100% + 4px)',
-      ...(parseFromValuesOrFunc(textFieldProps?.sx, theme) as any),
-    }),
-  };
-
-  const commonDatePickerProps = {
-    onChange: (newDate: any) => {
-      handleChange(newDate);
-    },
-    value: filterValue || null,
-  };
-
-  return (
-    <>
-      {filterVariant?.startsWith('time') ? (
-        <TimePicker
-          {...commonDatePickerProps}
-          {...timePickerProps}
-          slotProps={{
-            ...timePickerProps?.slotProps,
-            field: {
-              clearable: true,
-              onClear: () => handleClear(),
-              ...timePickerProps?.slotProps?.field,
-            },
-            textField: {
-              ...commonTextFieldProps,
-              ...timePickerProps?.slotProps?.textField,
-            },
-          }}
-        />
-      ) : filterVariant?.startsWith('datetime') ? (
-        <DateTimePicker
-          {...commonDatePickerProps}
-          {...dateTimePickerProps}
-          slotProps={{
-            ...dateTimePickerProps?.slotProps,
-            field: {
-              clearable: true,
-              onClear: () => handleClear(),
-              ...dateTimePickerProps?.slotProps?.field,
-            },
-            textField: {
-              ...commonTextFieldProps,
-              ...dateTimePickerProps?.slotProps?.textField,
-            },
-          }}
-        />
-      ) : filterVariant?.startsWith('date') ? (
-        <DatePicker
-          {...commonDatePickerProps}
-          {...datePickerProps}
-          slotProps={{
-            ...datePickerProps?.slotProps,
-            field: {
-              clearable: true,
-              onClear: () => handleClear(),
-              ...datePickerProps?.slotProps?.field,
-            },
-            textField: {
-              ...commonTextFieldProps,
-              ...datePickerProps?.slotProps?.textField,
-            },
-          }}
-        />
-      ) : isAutocompleteFilter ? (
-        <Autocomplete
-          freeSolo
-          getOptionLabel={(option: DropdownOption) =>
-            getValueAndLabel(option).label
-          }
-          onChange={(_e, newValue) =>
-            handleAutocompleteChange(newValue as DropdownOption | null)
-          }
-          options={
-            dropdownOptions?.map((option) => getValueAndLabel(option)) ?? []
-          }
-          inputValue={filterValue as string}
-          onInputChange={handleAutocompleteInputChange}
-          {...autocompleteProps}
-          renderInput={(builtinTextFieldProps: TextFieldProps) => (
-            <TextField
-              {...commonTextFieldProps}
-              {...builtinTextFieldProps}
-              slotProps={{
-                ...builtinTextFieldProps.slotProps,
-                ...commonTextFieldProps.slotProps,
-                input: {
-                  ...builtinTextFieldProps.InputProps,
-                  ...builtinTextFieldProps.slotProps?.input,
-                  startAdornment:
-                    //@ts-expect-error
-                    commonTextFieldProps?.slotProps?.input?.startAdornment,
-                },
-                htmlInput: {
-                  ...builtinTextFieldProps.inputProps,
-                  ...builtinTextFieldProps.slotProps?.htmlInput,
-                  ...commonTextFieldProps?.slotProps?.htmlInput,
-                },
-              }}
-              onClick={(e: MouseEvent<HTMLInputElement>) => e.stopPropagation()}
-            />
-          )}
-          value={autocompleteValue}
-        />
-      ) : (
-        <TextField
-          select={isSelectFilter || isMultiSelectFilter}
-          {...commonTextFieldProps}
-          slotProps={{
-            ...commonTextFieldProps.slotProps,
-            inputLabel: {
-              shrink: isSelectFilter || isMultiSelectFilter,
-              ...(commonTextFieldProps.slotProps?.inputLabel as any),
-            },
-            select: {
-              MenuProps: { disableScrollLock: true },
-              displayEmpty: true,
-              multiple: isMultiSelectFilter,
-              renderValue: isMultiSelectFilter
-                ? (selected: any) =>
-                    !Array.isArray(selected) || selected?.length === 0 ? (
-                      <Box sx={{ opacity: 0.5 }}>{filterPlaceholder}</Box>
-                    ) : (
-                      <Box
-                        sx={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}
+  // Render autocomplete filter
+  if (isAutocompleteFilter) {
+    return (
+      <div className={cn('relative w-full', minWidth)}>
+        <Popover open={autocompleteOpen} onOpenChange={setAutocompleteOpen}>
+          <PopoverTrigger asChild>
+            <div className="relative">
+              {showChangeModeButton && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+                  <MRT_IconButton
+                    onClick={handleFilterMenuOpen}
+                    size="small"
+                    tooltip={localization.changeFilterMode}
+                  >
+                    <FilterListIcon className="h-4 w-4" />
+                  </MRT_IconButton>
+                </div>
+              )}
+              <Input
+                ref={(ref) => {
+                  if (ref) {
+                    filterInputRefs.current![`${column.id}-${rangeFilterIndex ?? 0}`] = ref;
+                  }
+                }}
+                value={filterValue as string}
+                onChange={(e) => {
+                  setFilterValue(e.target.value);
+                  handleChangeDebounced(e.target.value);
+                }}
+                placeholder={filterPlaceholder}
+                className={cn(
+                  'h-8',
+                  showChangeModeButton && 'pl-10',
+                )}
+                onKeyDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0" align="start">
+            <Command>
+              <CommandInput placeholder={localization.search || 'Search...'} />
+              <CommandList>
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup>
+                  {dropdownOptions?.map((option, index) => {
+                    const { label, value } = getValueAndLabel(option);
+                    return (
+                      <CommandItem
+                        key={`${index}-${value}`}
+                        value={value}
+                        onSelect={() => {
+                          setAutocompleteValue(option);
+                          setFilterValue(value);
+                          handleChangeDebounced(value);
+                          setAutocompleteOpen(false);
+                        }}
                       >
-                        {selected.map((value: string) => {
-                          const selectedValue = dropdownOptions?.find(
-                            (option) =>
-                              getValueAndLabel(option).value === value,
-                          );
-                          return (
-                            <Chip
-                              key={value}
-                              label={getValueAndLabel(selectedValue).label}
-                            />
-                          );
-                        })}
-                      </Box>
-                    )
-                : undefined,
-              ...commonTextFieldProps.slotProps?.select,
-            },
-          }}
-          onChange={handleTextFieldChange}
-          onClick={(e: MouseEvent<HTMLInputElement>) => e.stopPropagation()}
-          value={
-            isMultiSelectFilter
-              ? Array.isArray(filterValue)
-                ? filterValue
-                : []
-              : filterValue
-          }
-        >
-          {(isSelectFilter || isMultiSelectFilter) && [
-            <MenuItem disabled divider hidden key="p" value="">
-              <Box sx={{ opacity: 0.5 }}>{filterPlaceholder}</Box>
-            </MenuItem>,
-            ...[
-              textFieldProps.children ??
-                dropdownOptions?.map((option, index) => {
-                  const { label, value } = getValueAndLabel(option);
-                  return (
-                    <MenuItem
-                      key={`${index}-${value}`}
-                      sx={{
-                        alignItems: 'center',
-                        display: 'flex',
-                        gap: '0.5rem',
-                        m: 0,
-                      }}
-                      value={value}
-                    >
-                      {isMultiSelectFilter && (
-                        <Checkbox
-                          checked={(
-                            (column.getFilterValue() ?? []) as string[]
-                          ).includes(value)}
-                          sx={{ mr: '0.5rem' }}
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            autocompleteValue === option
+                              ? 'opacity-100'
+                              : 'opacity-0',
+                          )}
                         />
-                      )}
-                      {label}{' '}
-                      {!columnDef.filterSelectOptions &&
-                        `(${facetedUniqueValues.get(value)})`}
-                    </MenuItem>
+                        {label}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+        {showChangeModeButton && filterChipLabel && (
+          <div className="mt-1 flex items-center gap-1">
+            <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
+              {filterChipLabel}
+            </span>
+            <MRT_IconButton size="small" onClick={handleClearEmptyFilterChip}>
+              <X className="h-3 w-3" />
+            </MRT_IconButton>
+          </div>
+        )}
+        <MRT_FilterOptionMenu
+          anchorEl={anchorEl}
+          header={header}
+          setAnchorEl={setAnchorEl}
+          setFilterValue={setFilterValue}
+          table={table}
+        />
+      </div>
+    );
+  }
+
+  // Render select or multi-select filter
+  if (isSelectFilter || isMultiSelectFilter) {
+    if (isMultiSelectFilter) {
+      // Multi-select using checkboxes in a popover
+      const selectedValues = Array.isArray(filterValue) ? filterValue : [];
+      return (
+        <div className={cn('relative w-full', minWidth)}>
+          <Popover>
+            <PopoverTrigger asChild>
+              <div className="relative">
+                {showChangeModeButton && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+                    <MRT_IconButton
+                      onClick={handleFilterMenuOpen}
+                      size="small"
+                      tooltip={localization.changeFilterMode}
+                    >
+                      <FilterListIcon className="h-4 w-4" />
+                    </MRT_IconButton>
+                  </div>
+                )}
+                <button
+                  className={cn(
+                    'flex h-8 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm',
+                    'focus:outline-none focus:ring-1 focus:ring-ring',
+                    showChangeModeButton && 'pl-10',
+                  )}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {selectedValues.length === 0 ? (
+                    <span className="text-muted-foreground">{filterPlaceholder}</span>
+                  ) : (
+                    <div className="flex flex-wrap gap-1">
+                      {selectedValues.map((value) => {
+                        const selectedOption = dropdownOptions?.find(
+                          (option) => getValueAndLabel(option).value === value,
+                        );
+                        return (
+                          <span
+                            key={value}
+                            className="bg-secondary text-secondary-foreground px-2 py-0.5 rounded text-xs"
+                          >
+                            {getValueAndLabel(selectedOption).label}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </button>
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-2" align="start">
+              <div className="space-y-2">
+                {dropdownOptions?.map((option, index) => {
+                  const { label, value } = getValueAndLabel(option);
+                  const isChecked = selectedValues.includes(value);
+                  return (
+                    <div key={`${index}-${value}`} className="flex items-center gap-2">
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={(checked) => {
+                          const newValues = checked
+                            ? [...selectedValues, value]
+                            : selectedValues.filter((v) => v !== value);
+                          setFilterValue(newValues);
+                          column.setFilterValue(newValues);
+                        }}
+                      />
+                      <label className="text-sm cursor-pointer flex-1">
+                        {label}
+                        {!columnDef.filterSelectOptions &&
+                          ` (${facetedUniqueValues.get(value)})`}
+                      </label>
+                    </div>
                   );
-                }),
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+          <MRT_FilterOptionMenu
+            anchorEl={anchorEl}
+            header={header}
+            setAnchorEl={setAnchorEl}
+            setFilterValue={setFilterValue}
+            table={table}
+          />
+        </div>
+      );
+    }
+
+    // Single select
+    return (
+      <div className={cn('relative w-full', minWidth)}>
+        <div className="relative">
+          {showChangeModeButton && (
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+              <MRT_IconButton
+                onClick={handleFilterMenuOpen}
+                size="small"
+                tooltip={localization.changeFilterMode}
+              >
+                <FilterListIcon className="h-4 w-4" />
+              </MRT_IconButton>
+            </div>
+          )}
+          <Select
+            value={filterValue as string}
+            onValueChange={(value) => {
+              setFilterValue(value);
+              column.setFilterValue(value);
+            }}
+          >
+            <SelectTrigger
+              className={cn('h-8', showChangeModeButton && 'pl-10')}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <SelectValue placeholder={filterPlaceholder} />
+            </SelectTrigger>
+            <SelectContent>
+              {dropdownOptions?.map((option, index) => {
+                const { label, value } = getValueAndLabel(option);
+                return (
+                  <SelectItem key={`${index}-${value}`} value={value}>
+                    {label}
+                    {!columnDef.filterSelectOptions &&
+                      ` (${facetedUniqueValues.get(value)})`}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+        <MRT_FilterOptionMenu
+          anchorEl={anchorEl}
+          header={header}
+          setAnchorEl={setAnchorEl}
+          setFilterValue={setFilterValue}
+          table={table}
+        />
+      </div>
+    );
+  }
+
+  // Render date filter
+  if (isDateFilter) {
+    const isDateRangeFilter = filterVariant === 'date-range' || 
+                               filterVariant === 'datetime-range' || 
+                               filterVariant === 'time-range';
+
+    if (isDateRangeFilter) {
+      // Date range filter
+      const dateRangeValue = column.getFilterValue() as DateRange | undefined;
+      
+      return (
+        <div className={cn('relative w-full', minWidth)}>
+          <div className="relative">
+            {showChangeModeButton && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+                <MRT_IconButton
+                  onClick={handleFilterMenuOpen}
+                  size="small"
+                  tooltip={localization.changeFilterMode}
+                >
+                  <FilterListIcon className="h-4 w-4" />
+                </MRT_IconButton>
+              </div>
+            )}
+            <div className={cn(showChangeModeButton && 'pl-10')}>
+              <MRT_DateRangePicker
+                value={dateRangeValue}
+                onChange={(dateRange) => {
+                  column.setFilterValue(dateRange ?? undefined);
+                }}
+                placeholder={filterPlaceholder}
+                disabled={textFieldProps.disabled}
+                className="w-full"
+              />
+            </div>
+          </div>
+          {showChangeModeButton && (
+            <div className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
+              {localization.filterMode.replace(
+                '{filterType}',
+                localization[
+                  `filter${
+                    currentFilterOption?.charAt(0)?.toUpperCase() +
+                    currentFilterOption?.slice(1)
+                  }` as keyof typeof localization
+                ],
+              )}
+            </div>
+          )}
+          <MRT_FilterOptionMenu
+            anchorEl={anchorEl}
+            header={header}
+            setAnchorEl={setAnchorEl}
+            setFilterValue={setFilterValue}
+            table={table}
+          />
+        </div>
+      );
+    } else {
+      // Single date filter
+      const dateValue = column.getFilterValue() as Date | undefined;
+      
+      return (
+        <div className={cn('relative w-full', minWidth)}>
+          <div className="relative">
+            {showChangeModeButton && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+                <MRT_IconButton
+                  onClick={handleFilterMenuOpen}
+                  size="small"
+                  tooltip={localization.changeFilterMode}
+                >
+                  <FilterListIcon className="h-4 w-4" />
+                </MRT_IconButton>
+              </div>
+            )}
+            <div className={cn(showChangeModeButton && 'pl-10')}>
+              <MRT_DatePicker
+                value={dateValue}
+                onChange={(date) => {
+                  column.setFilterValue(date ?? undefined);
+                }}
+                placeholder={filterPlaceholder}
+                disabled={textFieldProps.disabled}
+                className="w-full"
+              />
+            </div>
+          </div>
+          {showChangeModeButton && (
+            <div className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
+              {localization.filterMode.replace(
+                '{filterType}',
+                localization[
+                  `filter${
+                    currentFilterOption?.charAt(0)?.toUpperCase() +
+                    currentFilterOption?.slice(1)
+                  }` as keyof typeof localization
+                ],
+              )}
+            </div>
+          )}
+          <MRT_FilterOptionMenu
+            anchorEl={anchorEl}
+            header={header}
+            setAnchorEl={setAnchorEl}
+            setFilterValue={setFilterValue}
+            table={table}
+          />
+        </div>
+      );
+    }
+  }
+
+  // Render standard text input filter
+  return (
+    <div className={cn('relative w-full', minWidth)}>
+      <div className="relative">
+        {showChangeModeButton && (
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+            <MRT_IconButton
+              onClick={handleFilterMenuOpen}
+              size="small"
+              tooltip={localization.changeFilterMode}
+            >
+              <FilterListIcon className="h-4 w-4" />
+            </MRT_IconButton>
+          </div>
+        )}
+        <Input
+          ref={(ref) => {
+            if (ref) {
+              filterInputRefs.current![`${column.id}-${rangeFilterIndex ?? 0}`] = ref;
+            }
+          }}
+          type={textFieldProps.type || 'text'}
+          value={filterValue as string}
+          onChange={handleTextFieldChange}
+          placeholder={filterChipLabel || filterPlaceholder}
+          disabled={!!filterChipLabel}
+          className={cn(
+            'h-8',
+            showChangeModeButton && 'pl-10',
+            (filterValue?.toString()?.length ?? 0) > 0 && 'pr-10',
+            filterChipLabel && 'w-0',
+          )}
+          onKeyDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          {...textFieldProps}
+        />
+        {!filterChipLabel && (filterValue?.toString()?.length ?? 0) > 0 && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <MRT_IconButton size="small" onClick={handleClear} tooltip={localization.clearFilter}>
+              <CloseIcon className="h-4 w-4" />
+            </MRT_IconButton>
+          </div>
+        )}
+      </div>
+      {showChangeModeButton && filterChipLabel && (
+        <div className="mt-1 flex items-center gap-1">
+          <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
+            {filterChipLabel}
+          </span>
+          <MRT_IconButton size="small" onClick={handleClearEmptyFilterChip}>
+            <X className="h-3 w-3" />
+          </MRT_IconButton>
+        </div>
+      )}
+      {showChangeModeButton && !filterChipLabel && (
+        <div className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
+          {localization.filterMode.replace(
+            '{filterType}',
+            localization[
+              `filter${
+                currentFilterOption?.charAt(0)?.toUpperCase() +
+                currentFilterOption?.slice(1)
+              }` as keyof typeof localization
             ],
-          ]}
-        </TextField>
+          )}
+        </div>
       )}
       <MRT_FilterOptionMenu
         anchorEl={anchorEl}
@@ -582,6 +678,6 @@ export const MRT_FilterTextField = <TData extends MRT_RowData>({
         setFilterValue={setFilterValue}
         table={table}
       />
-    </>
+    </div>
   );
 };

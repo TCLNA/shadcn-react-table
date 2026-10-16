@@ -1,12 +1,15 @@
-import Collapse from '@mui/material/Collapse';
-import LinearProgress, {
-  type LinearProgressProps,
-} from '@mui/material/LinearProgress';
+import * as React from 'react';
+import {
+  Collapsible,
+  CollapsibleContent,
+} from '../../components/ui/collapsible';
+import { Progress } from '../../components/ui/progress';
+import { cn } from '../../lib/utils';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 
 export interface MRT_LinearProgressBarProps<TData extends MRT_RowData>
-  extends LinearProgressProps {
+  extends React.ComponentPropsWithoutRef<typeof Progress> {
   isTopToolbar: boolean;
   table: MRT_TableInstance<TData>;
 }
@@ -14,6 +17,7 @@ export interface MRT_LinearProgressBarProps<TData extends MRT_RowData>
 export const MRT_LinearProgressBar = <TData extends MRT_RowData>({
   isTopToolbar,
   table,
+  className,
   ...rest
 }: MRT_LinearProgressBarProps<TData>) => {
   const {
@@ -30,24 +34,24 @@ export const MRT_LinearProgressBar = <TData extends MRT_RowData>({
     ...rest,
   };
 
+  const isOpen = showProgressBars !== false && (showProgressBars || isSaving);
+
   return (
-    <Collapse
-      in={showProgressBars !== false && (showProgressBars || isSaving)}
-      mountOnEnter
-      sx={{
-        bottom: isTopToolbar ? 0 : undefined,
-        position: 'absolute',
-        top: !isTopToolbar ? 0 : undefined,
-        width: '100%',
-      }}
-      unmountOnExit
-    >
-      <LinearProgress
-        aria-busy="true"
-        aria-label="Loading"
-        sx={{ position: 'relative' }}
-        {...linearProgressProps}
-      />
-    </Collapse>
+    <Collapsible open={isOpen}>
+      <CollapsibleContent
+        className={cn(
+          'absolute w-full',
+          isTopToolbar ? 'bottom-0' : 'top-0',
+        )}
+      >
+        <Progress
+          aria-busy="true"
+          aria-label="Loading"
+          className={cn('relative h-1', className)}
+          value={undefined} // Indeterminate state
+          {...linearProgressProps}
+        />
+      </CollapsibleContent>
+    </Collapsible>
   );
 };

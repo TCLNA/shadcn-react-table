@@ -1,5 +1,3 @@
-import Box from '@mui/material/Box';
-import { type IconButtonProps } from '@mui/material/IconButton';
 import {
   type MRT_Row,
   type MRT_RowData,
@@ -7,6 +5,13 @@ import {
 } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_RowPinButton } from '../buttons/MRT_RowPinButton';
+
+// IconButtonProps type for compatibility
+interface IconButtonProps {
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+}
 
 export interface MRT_TableBodyRowPinButtonProps<TData extends MRT_RowData>
   extends IconButtonProps {
@@ -37,15 +42,12 @@ export const MRT_TableBodyRowPinButton = <TData extends MRT_RowData>({
 
   if (rowPinningDisplayMode === 'top-and-bottom' && !row.getIsPinned()) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: density === 'compact' ? 'row' : 'column',
-        }}
+      <div
+        className={`flex ${density === 'compact' ? 'flex-row' : 'flex-col'}`}
       >
         <MRT_RowPinButton pinningPosition="top" {...rowPinButtonProps} />
         <MRT_RowPinButton pinningPosition="bottom" {...rowPinButtonProps} />
-      </Box>
+      </div>
     );
   }
 

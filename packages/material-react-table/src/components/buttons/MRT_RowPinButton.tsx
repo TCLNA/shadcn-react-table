@@ -1,17 +1,15 @@
-import { type MouseEvent, useState } from 'react';
+import { type MouseEvent } from 'react';
 import { type RowPinningPosition } from '@tanstack/react-table';
-import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import {
   type MRT_Row,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { getCommonTooltipProps } from '../../utils/style.utils';
-import { parseFromValuesOrFunc } from '../../utils/utils';
+import { MRT_IconButton, type MRT_IconButtonProps } from './MRT_IconButton';
+import { cn } from '../../lib/utils';
 
 export interface MRT_RowPinButtonProps<TData extends MRT_RowData>
-  extends IconButtonProps {
+  extends Omit<MRT_IconButtonProps, 'tooltip' | 'size'> {
   pinningPosition: RowPinningPosition;
   row: MRT_Row<TData>;
   table: MRT_TableInstance<TData>;
@@ -33,52 +31,36 @@ export const MRT_RowPinButton = <TData extends MRT_RowData>({
 
   const isPinned = row.getIsPinned();
 
-  const [tooltipOpened, setTooltipOpened] = useState(false);
-
   const handleTogglePin = (event: MouseEvent<HTMLButtonElement>) => {
-    setTooltipOpened(false);
     event.stopPropagation();
     row.pin(isPinned ? false : pinningPosition);
   };
 
   return (
-    <Tooltip
-      {...getCommonTooltipProps()}
-      open={tooltipOpened}
-      title={isPinned ? localization.unpin : localization.pin}
+    <MRT_IconButton
+      aria-label={localization.pin}
+      onClick={handleTogglePin}
+      size="small"
+      tooltip={isPinned ? localization.unpin : localization.pin}
+      className={cn('h-6 w-6', rest.className)}
+      {...rest}
     >
-      <IconButton
-        aria-label={localization.pin}
-        onBlur={() => setTooltipOpened(false)}
-        onClick={handleTogglePin}
-        onFocus={() => setTooltipOpened(true)}
-        onMouseEnter={() => setTooltipOpened(true)}
-        onMouseLeave={() => setTooltipOpened(false)}
-        size="small"
-        {...rest}
-        sx={(theme) => ({
-          height: '24px',
-          width: '24px',
-          ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-        })}
-      >
-        {isPinned ? (
-          <CloseIcon />
-        ) : (
-          <PushPinIcon
-            fontSize="small"
-            style={{
-              transform: `rotate(${
-                rowPinningDisplayMode === 'sticky'
-                  ? 135
-                  : pinningPosition === 'top'
-                    ? 180
-                    : 0
-              }deg)`,
-            }}
-          />
-        )}
-      </IconButton>
-    </Tooltip>
+      {isPinned ? (
+        <CloseIcon />
+      ) : (
+        <PushPinIcon
+          fontSize="small"
+          style={{
+            transform: `rotate(${
+              rowPinningDisplayMode === 'sticky'
+                ? 135
+                : pinningPosition === 'top'
+                  ? 180
+                  : 0
+            }deg)`,
+          }}
+        />
+      )}
+    </MRT_IconButton>
   );
 };

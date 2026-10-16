@@ -1,4 +1,3 @@
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { type MRT_ColumnDef, MaterialReactTable } from '../../src';
 import { faker } from '@faker-js/faker';
 import { type Meta } from '@storybook/react';
@@ -40,41 +39,31 @@ export const DefaultTheme = () => (
 );
 
 export const CustomLightTheme = () => {
-  const theme = createTheme({
-    palette: {
-      background: {
-        default: '#ffffef',
-      },
-      primary: {
-        main: '#ff9800',
-      },
-      secondary: {
-        main: '#00bcd4',
-      },
-    },
-  });
   return (
-    <ThemeProvider theme={theme}>
+    <div
+      style={{
+        // Custom CSS variables for light theme
+        ['--primary' as string]: '25 95% 53%', // Orange
+        ['--secondary' as string]: '187 71% 42%', // Cyan
+        ['--background' as string]: '60 100% 97%', // Light yellow
+      }}
+    >
       <MaterialReactTable columns={columns} data={data} enableRowSelection />
-    </ThemeProvider>
+    </div>
   );
 };
 
 export const CustomDarkTheme = () => {
-  const theme = createTheme({
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#81980f',
-      },
-      secondary: {
-        main: '#00bcd4',
-      },
-    },
-  });
   return (
-    <ThemeProvider theme={theme}>
+    <div
+      className="dark"
+      style={{
+        // Custom CSS variables for dark theme
+        ['--primary' as string]: '75 60% 45%', // Green
+        ['--secondary' as string]: '187 71% 42%', // Cyan
+      }}
+    >
       <MaterialReactTable columns={columns} data={data} enableRowSelection />
-    </ThemeProvider>
+    </div>
   );
 };

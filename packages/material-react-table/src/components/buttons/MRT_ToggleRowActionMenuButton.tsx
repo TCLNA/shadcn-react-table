@@ -1,6 +1,4 @@
 import { type MouseEvent, useState } from 'react';
-import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import { MRT_EditActionButtons } from './MRT_EditActionButtons';
 import {
   type MRT_Cell,
@@ -8,23 +6,16 @@ import {
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { getCommonTooltipProps } from '../../utils/style.utils';
+import { MRT_IconButton, type MRT_IconButtonProps } from './MRT_IconButton';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_RowActionMenu } from '../menus/MRT_RowActionMenu';
+import { cn } from '../../lib/utils';
 
-const commonIconButtonStyles = {
-  '&:hover': {
-    opacity: 1,
-  },
-  height: '2rem',
-  ml: '10px',
-  opacity: 0.5,
-  transition: 'opacity 150ms',
-  width: '2rem',
-};
+const commonIconButtonClasses =
+  'h-8 w-8 ml-2.5 opacity-50 hover:opacity-100 transition-opacity duration-150';
 
 export interface MRT_ToggleRowActionMenuButtonProps<TData extends MRT_RowData>
-  extends IconButtonProps {
+  extends Omit<MRT_IconButtonProps, 'tooltip'> {
   cell: MRT_Cell<TData>;
   row: MRT_Row<TData>;
   staticRowIndex?: number;
@@ -84,33 +75,32 @@ export const MRT_ToggleRowActionMenuButton = <TData extends MRT_RowData>({
       ) : !renderRowActionMenuItems &&
         parseFromValuesOrFunc(enableEditing, row) &&
         ['modal', 'row'].includes(editDisplayMode!) ? (
-        <Tooltip placement="right" title={localization.edit}>
-          <IconButton
-            aria-label={localization.edit}
-            onClick={handleStartEditMode}
-            sx={commonIconButtonStyles}
-            {...rest}
-          >
-            <EditIcon />
-          </IconButton>
-        </Tooltip>
+        <MRT_IconButton
+          aria-label={localization.edit}
+          onClick={handleStartEditMode}
+          tooltip={localization.edit}
+          tooltipPlacement="right"
+          className={cn(commonIconButtonClasses, rest.className)}
+          {...rest}
+        >
+          <EditIcon />
+        </MRT_IconButton>
       ) : renderRowActionMenuItems?.({
           row,
           staticRowIndex,
           table,
         } as any)?.length ? (
         <>
-          <Tooltip {...getCommonTooltipProps()} title={localization.rowActions}>
-            <IconButton
-              aria-label={localization.rowActions}
-              onClick={handleOpenRowActionMenu}
-              size="small"
-              sx={commonIconButtonStyles}
-              {...rest}
-            >
-              <MoreHorizIcon />
-            </IconButton>
-          </Tooltip>
+          <MRT_IconButton
+            aria-label={localization.rowActions}
+            onClick={handleOpenRowActionMenu}
+            size="small"
+            tooltip={localization.rowActions}
+            className={cn(commonIconButtonClasses, rest.className)}
+            {...rest}
+          >
+            <MoreHorizIcon />
+          </MRT_IconButton>
           <MRT_RowActionMenu
             anchorEl={anchorEl}
             handleEdit={handleStartEditMode}

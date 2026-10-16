@@ -88,9 +88,9 @@ const Example = () => {
           },
       }),
     },
-    mrtTheme: (theme) => ({
+    mrtTheme: () => ({
       baseBackgroundColor: baseBackgroundColor,
-      draggingBorderColor: theme.palette.secondary.main,
+      draggingBorderColor: 'hsl(var(--secondary))',
     }),
   });
 

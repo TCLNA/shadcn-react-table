@@ -24,7 +24,7 @@ const TableInstanceAPIsTable = ({ onlyOptions }: Props) => {
         header: 'State Option',
         muiCopyButtonProps: ({ cell }) => ({
           className: 'table-instance-api',
-          id: `${cell.getValue<string>()}-table-instance-api`,
+          id: `${(cell.getValue() as string)}-table-instance-api`,
         }),
       },
       {
@@ -43,7 +43,7 @@ const TableInstanceAPIsTable = ({ onlyOptions }: Props) => {
               minHeight: 'unset',
             }}
           >
-            {cell.getValue<string>()}
+            {(cell.getValue() as string)}
           </SampleCodeSnippet>
         ),
       },
@@ -53,10 +53,10 @@ const TableInstanceAPIsTable = ({ onlyOptions }: Props) => {
         enableGlobalFilter: false,
         header: 'More Info Links',
         Cell: ({ cell, row }) => (
-          <Link href={cell.getValue<string>()} passHref legacyBehavior>
+          <Link href={(cell.getValue() as string)} passHref legacyBehavior>
             <MuiLink
               target={
-                cell.getValue<string>().startsWith('http')
+                (cell.getValue() as string).startsWith('http')
                   ? '_blank'
                   : undefined
               }

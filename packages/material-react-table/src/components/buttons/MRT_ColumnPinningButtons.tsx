@@ -1,23 +1,21 @@
-import Box, { type BoxProps } from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import {
   type MRT_Column,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { parseFromValuesOrFunc } from '../../utils/utils';
+import { MRT_IconButton } from './MRT_IconButton';
+import { cn } from '../../lib/utils';
 
-export interface MRT_ColumnPinningButtonsProps<TData extends MRT_RowData>
-  extends BoxProps {
+export interface MRT_ColumnPinningButtonsProps<TData extends MRT_RowData> {
   column: MRT_Column<TData>;
   table: MRT_TableInstance<TData>;
+  className?: string;
 }
 
 export const MRT_ColumnPinningButtons = <TData extends MRT_RowData>({
   column,
   table,
-  ...rest
+  className,
 }: MRT_ColumnPinningButtonsProps<TData>) => {
   const {
     options: {
@@ -31,42 +29,41 @@ export const MRT_ColumnPinningButtons = <TData extends MRT_RowData>({
   };
 
   return (
-    <Box
-      {...rest}
-      sx={(theme) => ({
-        minWidth: '70px',
-        textAlign: 'center',
-        ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-      })}
-    >
+    <div className={cn('min-w-[70px] text-center', className)}>
       {column.getIsPinned() ? (
-        <Tooltip title={localization.unpin}>
-          <IconButton onClick={() => handlePinColumn(false)} size="small">
-            <PushPinIcon />
-          </IconButton>
-        </Tooltip>
+        <MRT_IconButton
+          onClick={() => handlePinColumn(false)}
+          size="small"
+          tooltip={localization.unpin}
+        >
+          <PushPinIcon />
+        </MRT_IconButton>
       ) : (
         <>
-          <Tooltip title={localization.pinToLeft}>
-            <IconButton onClick={() => handlePinColumn('left')} size="small">
-              <PushPinIcon
-                style={{
-                  transform: 'rotate(90deg)',
-                }}
-              />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={localization.pinToRight}>
-            <IconButton onClick={() => handlePinColumn('right')} size="small">
-              <PushPinIcon
-                style={{
-                  transform: 'rotate(-90deg)',
-                }}
-              />
-            </IconButton>
-          </Tooltip>
+          <MRT_IconButton
+            onClick={() => handlePinColumn('left')}
+            size="small"
+            tooltip={localization.pinToLeft}
+          >
+            <PushPinIcon
+              style={{
+                transform: 'rotate(90deg)',
+              }}
+            />
+          </MRT_IconButton>
+          <MRT_IconButton
+            onClick={() => handlePinColumn('right')}
+            size="small"
+            tooltip={localization.pinToRight}
+          >
+            <PushPinIcon
+              style={{
+                transform: 'rotate(-90deg)',
+              }}
+            />
+          </MRT_IconButton>
         </>
       )}
-    </Box>
+    </div>
   );
 };

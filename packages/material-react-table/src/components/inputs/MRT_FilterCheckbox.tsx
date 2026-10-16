@@ -1,24 +1,28 @@
-import Checkbox, { type CheckboxProps } from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Tooltip from '@mui/material/Tooltip';
+import { Checkbox } from '../ui/checkbox';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip';
+import { cn } from '../../lib/utils';
 import {
   type MRT_Column,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { getCommonTooltipProps } from '../../utils/style.utils';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 
-export interface MRT_FilterCheckboxProps<TData extends MRT_RowData>
-  extends CheckboxProps {
+export interface MRT_FilterCheckboxProps<TData extends MRT_RowData> {
   column: MRT_Column<TData>;
   table: MRT_TableInstance<TData>;
+  className?: string;
 }
 
 export const MRT_FilterCheckbox = <TData extends MRT_RowData>({
   column,
   table,
-  ...rest
+  className,
 }: MRT_FilterCheckboxProps<TData>) => {
   const {
     getState,
@@ -36,7 +40,6 @@ export const MRT_FilterCheckbox = <TData extends MRT_RowData>({
       column,
       table,
     }),
-    ...rest,
   };
 
   const filterLabel = localization.filterByColumn?.replace(
@@ -44,47 +47,47 @@ export const MRT_FilterCheckbox = <TData extends MRT_RowData>({
     columnDef.header,
   );
 
+  const filterValue = column.getFilterValue();
+  const isChecked = filterValue === 'true';
+  const isIndeterminate = filterValue === undefined;
+
+  const handleChange = () => {
+    const currentValue = column.getFilterValue();
+    const newValue =
+      currentValue === undefined
+        ? 'true'
+        : currentValue === 'true'
+          ? 'false'
+          : undefined;
+    column.setFilterValue(newValue);
+  };
+
+  const sizeClass = density === 'compact' ? 'h-4 w-4' : 'h-5 w-5';
+
   return (
-    <Tooltip
-      {...getCommonTooltipProps()}
-      title={checkboxProps?.title ?? filterLabel}
-    >
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={column.getFilterValue() === 'true'}
-            color={
-              column.getFilterValue() === undefined ? 'default' : 'primary'
-            }
-            indeterminate={column.getFilterValue() === undefined}
-            size={density === 'compact' ? 'small' : 'medium'}
-            {...checkboxProps}
-            onChange={(e, checked) => {
-              column.setFilterValue(
-                column.getFilterValue() === undefined
-                  ? 'true'
-                  : column.getFilterValue() === 'true'
-                    ? 'false'
-                    : undefined,
-              );
-              checkboxProps?.onChange?.(e, checked);
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              checkboxProps?.onClick?.(e);
-            }}
-            sx={(theme) => ({
-              height: '2.5rem',
-              width: '2.5rem',
-              ...(parseFromValuesOrFunc(checkboxProps?.sx, theme) as any),
-            })}
-          />
-        }
-        disableTypography
-        label={checkboxProps.title ?? filterLabel}
-        sx={{ color: 'text.secondary', fontWeight: 'normal', mt: '-4px' }}
-        title={undefined}
-      />
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground font-normal -mt-1">
+            <Checkbox
+              checked={isChecked}
+              // @ts-expect-error - indeterminate is not in the type but is supported
+              indeterminate={isIndeterminate}
+              onCheckedChange={handleChange}
+              onClick={(e) => {
+                e.stopPropagation();
+                checkboxProps?.onClick?.(e);
+              }}
+              className={cn(sizeClass, className)}
+              {...checkboxProps}
+            />
+            <span>{checkboxProps.title ?? filterLabel}</span>
+          </label>
+        </TooltipTrigger>
+        <TooltipContent>
+          {checkboxProps?.title ?? filterLabel}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

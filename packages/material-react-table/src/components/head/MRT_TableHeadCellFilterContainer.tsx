@@ -1,4 +1,4 @@
-import Collapse, { type CollapseProps } from '@mui/material/Collapse';
+import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
 import {
   type MRT_Header,
   type MRT_RowData,
@@ -12,7 +12,7 @@ import { MRT_FilterTextField } from '../inputs/MRT_FilterTextField';
 
 export interface MRT_TableHeadCellFilterContainerProps<
   TData extends MRT_RowData,
-> extends CollapseProps {
+> extends React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.Root> {
   header: MRT_Header<TData>;
   table: MRT_TableInstance<TData>;
 }
@@ -32,21 +32,23 @@ export const MRT_TableHeadCellFilterContainer = <TData extends MRT_RowData>({
   const { isRangeFilter } = getColumnFilterInfo({ header, table });
 
   return (
-    <Collapse
-      in={showColumnFilters || columnFilterDisplayMode === 'popover'}
-      mountOnEnter
-      unmountOnExit
+    <CollapsiblePrimitive.Root
+      open={showColumnFilters || columnFilterDisplayMode === 'popover'}
       {...rest}
     >
-      {columnDef.filterVariant === 'checkbox' ? (
-        <MRT_FilterCheckbox column={column} table={table} />
-      ) : columnDef.filterVariant === 'range-slider' ? (
-        <MRT_FilterRangeSlider header={header} table={table} />
-      ) : isRangeFilter ? (
-        <MRT_FilterRangeFields header={header} table={table} />
-      ) : (
-        <MRT_FilterTextField header={header} table={table} />
-      )}
-    </Collapse>
+      <CollapsiblePrimitive.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+        <div className="flex flex-col gap-1 pt-1">
+          {columnDef.filterVariant === 'checkbox' ? (
+            <MRT_FilterCheckbox column={column} table={table} />
+          ) : columnDef.filterVariant === 'range-slider' ? (
+            <MRT_FilterRangeSlider header={header} table={table} />
+          ) : isRangeFilter ? (
+            <MRT_FilterRangeFields header={header} table={table} />
+          ) : (
+            <MRT_FilterTextField header={header} table={table} />
+          )}
+        </div>
+      </CollapsiblePrimitive.Content>
+    </CollapsiblePrimitive.Root>
   );
 };

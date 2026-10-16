@@ -1,10 +1,6 @@
-import AddBoxIcon from '@mui/icons-material/AddBox';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
+import { Plus, Trash2 } from 'lucide-react';
+import { Button } from '../../src/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../src/components/ui/tooltip';
 import {
   type MRT_ColumnDef,
   MRT_ToggleFullScreenButton,
@@ -113,7 +109,7 @@ export const TableTitle = () => (
     data={data}
     enableRowSelection
     renderTopToolbarCustomActions={() => {
-      return <Typography variant="h4">Table Title</Typography>;
+      return <h2 className="text-2xl font-bold">Table Title</h2>;
     }}
   />
 );
@@ -129,13 +125,16 @@ export const CustomTopToolbarActions = () => (
       };
 
       return (
-        <div>
-          <Tooltip title="Create New User">
-            <IconButton onClick={handleCreateNewUser}>
-              <AddBoxIcon />
-            </IconButton>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={handleCreateNewUser}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Create New User</TooltipContent>
           </Tooltip>
-        </div>
+        </TooltipProvider>
       );
     }}
   />
@@ -152,13 +151,16 @@ export const CustomBottomToolbarActions = () => (
       };
 
       return (
-        <div>
-          <Tooltip title="Create New User">
-            <IconButton onClick={handleCreateNewUser}>
-              <AddBoxIcon />
-            </IconButton>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={handleCreateNewUser}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Create New User</TooltipContent>
           </Tooltip>
-        </div>
+        </TooltipProvider>
       );
     }}
   />
@@ -189,28 +191,24 @@ export const CustomTopToolbarSelectionActions = () => (
       };
 
       return (
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="flex gap-2">
           <Button
-            color="error"
+            variant="destructive"
             disabled={table.getSelectedRowModel().flatRows.length === 0}
             onClick={handleDeactivate}
-            variant="contained"
           >
             Deactivate
           </Button>
           <Button
-            color="success"
             disabled={table.getSelectedRowModel().flatRows.length === 0}
             onClick={handleActivate}
-            variant="contained"
           >
             Activate
           </Button>
           <Button
-            color="info"
+            variant="secondary"
             disabled={table.getSelectedRowModel().flatRows.length === 0}
             onClick={handleContact}
-            variant="contained"
           >
             Contact
           </Button>
@@ -245,28 +243,24 @@ export const CustomBottomToolbarSelectionActions = () => (
       };
 
       return (
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="flex gap-2">
           <Button
-            color="error"
+            variant="destructive"
             disabled={table.getSelectedRowModel().flatRows.length === 0}
             onClick={handleDeactivate}
-            variant="contained"
           >
             Deactivate
           </Button>
           <Button
-            color="success"
             disabled={table.getSelectedRowModel().flatRows.length === 0}
             onClick={handleActivate}
-            variant="contained"
           >
             Activate
           </Button>
           <Button
-            color="info"
+            variant="secondary"
             disabled={table.getSelectedRowModel().flatRows.length === 0}
             onClick={handleContact}
-            variant="contained"
           >
             Contact
           </Button>
@@ -291,23 +285,31 @@ export const ToolbarAlertBannerBottom = () => (
       };
 
       return (
-        <div>
-          <Tooltip title="Create New User">
-            <IconButton onClick={handleCreateNewUser}>
-              <AddBoxIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Remove Users">
-            <span>
-              <IconButton
-                disabled={table.getSelectedRowModel().flatRows.length === 0}
-                onClick={handleRemoveUsers}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </div>
+        <TooltipProvider>
+          <div className="flex gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={handleCreateNewUser}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Create New User</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={table.getSelectedRowModel().flatRows.length === 0}
+                  onClick={handleRemoveUsers}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Remove Users</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
       );
     }}
   />
@@ -328,23 +330,31 @@ export const ToolbarAlertBannerBottomWithActionsAlsoBottom = () => (
       };
 
       return (
-        <div>
-          <Tooltip title="Create New User">
-            <IconButton onClick={handleCreateNewUser}>
-              <AddBoxIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Remove Users">
-            <span>
-              <IconButton
-                disabled={table.getSelectedRowModel().flatRows.length === 0}
-                onClick={handleRemoveUsers}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </div>
+        <TooltipProvider>
+          <div className="flex gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={handleCreateNewUser}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Create New User</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={table.getSelectedRowModel().flatRows.length === 0}
+                  onClick={handleRemoveUsers}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Remove Users</TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
       );
     }}
   />
@@ -354,7 +364,7 @@ export const renderCustomTopToolbar = () => (
   <MaterialReactTable
     columns={columns}
     data={data}
-    renderTopToolbar={() => <Box sx={{ p: '2rem' }}>Custom Top Toolbar</Box>}
+    renderTopToolbar={() => <div className="p-8">Custom Top Toolbar</div>}
   />
 );
 
@@ -363,7 +373,7 @@ export const renderCustomBottomToolbar = () => (
     columns={columns}
     data={data}
     renderBottomToolbar={() => (
-      <Box sx={{ p: '2rem' }}>Custom Bottom Toolbar</Box>
+      <div className="p-8">Custom Bottom Toolbar</div>
     )}
   />
 );

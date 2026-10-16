@@ -19,7 +19,7 @@ const Example = () => {
         accessorKey: 'salary',
         header: 'Salary',
         Cell: ({ cell }) =>
-          cell.getValue<number>().toLocaleString('en-US', {
+          (cell.getValue() as number).toLocaleString('en-US', {
             style: 'currency',
             currency: 'USD',
           }),

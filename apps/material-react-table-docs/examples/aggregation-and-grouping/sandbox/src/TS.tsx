@@ -41,7 +41,7 @@ const Example = () => {
             <Box
               sx={{ color: 'info.main', display: 'inline', fontWeight: 'bold' }}
             >
-              {cell.getValue<number>()}
+              {(cell.getValue() as number)}
             </Box>
           </>
         ),
@@ -58,7 +58,7 @@ const Example = () => {
         //optionally, customize the cell render when this column is grouped. Make the text blue and pluralize the word
         GroupedCell: ({ cell, row }) => (
           <Box sx={{ color: 'primary.main' }}>
-            <strong>{cell.getValue<string>()}s </strong> ({row.subRows?.length})
+            <strong>{(cell.getValue() as string)}s </strong> ({row.subRows?.length})
           </Box>
         ),
       },
@@ -76,7 +76,7 @@ const Example = () => {
             Average by{' '}
             {table.getColumn(cell.row.groupingColumnId ?? '').columnDef.header}:{' '}
             <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
-              {cell.getValue<number>()?.toLocaleString?.('en-US', {
+              {(cell.getValue() as number)?.toLocaleString?.('en-US', {
                 style: 'currency',
                 currency: 'USD',
                 minimumFractionDigits: 0,
@@ -88,7 +88,7 @@ const Example = () => {
         //customize normal cell render on normal non-aggregated rows
         Cell: ({ cell }) => (
           <>
-            {cell.getValue<number>()?.toLocaleString?.('en-US', {
+            {(cell.getValue() as number)?.toLocaleString?.('en-US', {
               style: 'currency',
               currency: 'USD',
               minimumFractionDigits: 0,

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Utils Manual Test</title>
+  <style>
+    /* Import the CSS variables */
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222.2 84% 4.9%;
+      --primary: 221.2 83.2% 53.3%;
+      --primary-foreground: 210 40% 98%;
+      --radius: 0.5rem;
+    }
+
+    .dark {
+      --background: 222.2 84% 4.9%;
+      --foreground: 210 40% 98%;
+      --primary: 217.2 91.2% 59.8%;
+      --primary-foreground: 222.2 47.4% 11.2%;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 2rem;
+      background: hsl(var(--background));
+      color: hsl(var(--foreground));
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .test-box {
+      padding: 1rem;
+      margin: 1rem 0;
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      border-radius: var(--radius);
+      transition: all 0.3s;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      margin: 0.5rem;
+      background: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .controls {
+      margin: 2rem 0;
+      padding: 1rem;
+      border: 1px solid hsl(var(--foreground) / 0.2);
+      border-radius: var(--radius);
+    }
+
+    .status {
+      margin: 1rem 0;
+      padding: 1rem;
+      background: hsl(var(--foreground) / 0.05);
+      border-radius: var(--radius);
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>Theme Utils Manual Test</h1>
+  
+  <div class="test-box">
+    This box uses CSS variables for styling
+  </div>
+
+  <div class="controls">
+    <h2>Dark Mode Controls</h2>
+    <button onclick="toggleDark()">Toggle Dark Mode</button>
+    <button onclick="enableDark()">Enable Dark Mode</button>
+    <button onclick="disableDark()">Disable Dark Mode</button>
+    <div class="status" id="darkStatus">Dark mode: <span id="darkValue">false</span></div>
+  </div>
+
+  <div class="controls">
+    <h2>Color Controls</h2>
+    <button onclick="setPrimaryBlue()">Set Primary Blue</button>
+    <button onclick="setPrimaryGreen()">Set Primary Green</button>
+    <button onclick="setPrimaryPurple()">Set Primary Purple</button>
+    <button onclick="resetColors()">Reset Colors</button>
+    <div class="status" id="colorStatus">Primary: <span id="colorValue">221.2 83.2% 53.3%</span></div>
+  </div>
+
+  <div class="controls">
+    <h2>Radius Controls</h2>
+    <input type="range" id="radiusSlider" min="0" max="24" value="8" oninput="updateRadius(this.value)">
+    <div class="status" id="radiusStatus">Radius: <span id="radiusValue">0.5rem</span></div>
+  </div>
+
+  <div class="controls">
+    <h2>Hex to HSL Conversion</h2>
+    <input type="color" id="colorPicker" value="#3b82f6" oninput="convertHex(this.value)">
+    <div class="status" id="hexStatus">HSL: <span id="hexValue">221 83% 53%</span></div>
+  </div>
+
+  <script>
+    // Simulate the theme utility functions
+    function isDarkMode() {
+      return document.documentElement.classList.contains('dark');
+    }
+
+    function enableDark() {
+      document.documentElement.classList.add('dark');
+      updateDarkStatus();
+    }
+
+    function disableDark() {
+      document.documentElement.classList.remove('dark');
+      updateDarkStatus();
+    }
+
+    function toggleDark() {
+      document.documentElement.classList.toggle('dark');
+      updateDarkStatus();
+    }
+
+    function updateDarkStatus() {
+      document.getElementById('darkValue').textContent = isDarkMode();
+    }
+
+    function setPrimaryBlue() {
+      document.documentElement.style.setProperty('--primary', '221 83% 53%');
+      updateColorStatus();
+    }
+
+    function setPrimaryGreen() {
+      document.documentElement.style.setProperty('--primary', '142 76% 36%');
+      updateColorStatus();
+    }
+
+    function setPrimaryPurple() {
+      document.documentElement.style.setProperty('--primary', '262 83% 58%');
+      updateColorStatus();
+    }
+
+    function resetColors() {
+      document.documentElement.style.removeProperty('--primary');
+      updateColorStatus();
+    }
+
+    function updateColorStatus() {
+      const value = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+      document.getElementById('colorValue').textContent = value;
+    }
+
+    function updateRadius(value) {
+      const rem = value / 16;
+      document.documentElement.style.setProperty('--radius', `${rem}rem`);
+      document.getElementById('radiusValue').textContent = `${rem}rem (${value}px)`;
+    }
+
+    function hexToHSL(hex) {
+      hex = hex.replace(/^#/, '');
+      const r = parseInt(hex.substring(0, 2), 16) / 255;
+      const g = parseInt(hex.substring(2, 4), 16) / 255;
+      const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h = 0;
+      let s = 0;
+      const l = (max + min) / 2;
+
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+        switch (max) {
+          case r:
+            h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+            break;
+          case g:
+            h = ((b - r) / d + 2) / 6;
+            break;
+          case b:
+            h = ((r - g) / d + 4) / 6;
+            break;
+        }
+      }
+
+      h = Math.round(h * 360);
+      s = Math.round(s * 100);
+      const lPercent = Math.round(l * 100);
+
+      return `${h} ${s}% ${lPercent}%`;
+    }
+
+    function convertHex(hex) {
+      const hsl = hexToHSL(hex);
+      document.getElementById('hexValue').textContent = hsl;
+      document.documentElement.style.setProperty('--primary', hsl);
+      updateColorStatus();
+    }
+
+    // Initialize status displays
+    updateDarkStatus();
+    updateColorStatus();
+  </script>
+</body>
+</html>

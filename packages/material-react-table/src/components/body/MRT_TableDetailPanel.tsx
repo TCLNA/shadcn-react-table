@@ -1,7 +1,6 @@
 import { type RefObject } from 'react';
-import Collapse from '@mui/material/Collapse';
-import TableCell, { type TableCellProps } from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
+import { TableCell, TableRow } from '../ui/table';
+import { CollapsibleContent } from '../ui/collapsible';
 import {
   type MRT_Row,
   type MRT_RowData,
@@ -10,9 +9,10 @@ import {
   type MRT_VirtualItem,
 } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '@/lib/utils';
 
 export interface MRT_TableDetailPanelProps<TData extends MRT_RowData>
-  extends TableCellProps {
+  extends React.TdHTMLAttributes<HTMLTableCellElement> {
   parentRowRef: RefObject<HTMLTableRowElement | null>;
   row: MRT_Row<TData>;
   rowVirtualizer?: MRT_RowVirtualizer;
@@ -62,47 +62,54 @@ export const MRT_TableDetailPanel = <TData extends MRT_RowData>({
 
   return (
     <TableRow
-      className="Mui-TableBodyCell-DetailPanel"
+      className={cn(
+        "Mui-TableBodyCell-DetailPanel",
+        layoutMode?.startsWith('grid') && "flex",
+        virtualRow && "absolute w-full",
+        tableRowProps?.className
+      )}
       data-index={renderDetailPanel ? staticRowIndex * 2 + 1 : staticRowIndex}
       ref={(node: HTMLTableRowElement) => {
         if (node) {
           rowVirtualizer?.measureElement?.(node);
         }
       }}
-      {...tableRowProps}
-      sx={(theme) => ({
-        display: layoutMode?.startsWith('grid') ? 'flex' : undefined,
-        position: virtualRow ? 'absolute' : undefined,
+      style={{
         top: virtualRow
           ? `${parentRowRef.current?.getBoundingClientRect()?.height}px`
           : undefined,
         transform: virtualRow
           ? `translateY(${virtualRow?.start}px)`
           : undefined,
-        width: '100%',
-        ...(parseFromValuesOrFunc(tableRowProps?.sx, theme) as any),
-      })}
+        ...tableRowProps?.style,
+      }}
+      {...tableRowProps}
     >
       <TableCell
-        className="Mui-TableBodyCell-DetailPanel"
+        className={cn(
+          "Mui-TableBodyCell-DetailPanel",
+          layoutMode?.startsWith('grid') && "flex",
+          "w-full border-b-0 transition-all duration-150 ease-in-out",
+          !!DetailPanel && row.getIsExpanded() ? "py-4" : "py-0",
+          !row.getIsExpanded() && "border-b-0",
+          tableCellProps?.className
+        )}
         colSpan={getVisibleLeafColumns().length}
-        {...tableCellProps}
-        sx={(theme) => ({
+        style={{
           backgroundColor: virtualRow ? baseBackgroundColor : undefined,
-          borderBottom: !row.getIsExpanded() ? 'none' : undefined,
-          display: layoutMode?.startsWith('grid') ? 'flex' : undefined,
-          py: !!DetailPanel && row.getIsExpanded() ? '1rem' : 0,
-          transition: !virtualRow ? 'all 150ms ease-in-out' : undefined,
-          width: `100%`,
-          ...(parseFromValuesOrFunc(tableCellProps?.sx, theme) as any),
-        })}
+          ...tableCellProps?.style,
+        }}
+        {...tableCellProps}
       >
         {virtualRow ? (
           row.getIsExpanded() && DetailPanel
         ) : (
-          <Collapse in={row.getIsExpanded()} mountOnEnter unmountOnExit>
-            {DetailPanel}
-          </Collapse>
+          <CollapsibleContent
+            className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+            forceMount={row.getIsExpanded() ? true : undefined}
+          >
+            {row.getIsExpanded() && DetailPanel}
+          </CollapsibleContent>
         )}
       </TableCell>
     </TableRow>

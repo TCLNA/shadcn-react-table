@@ -1,33 +1,24 @@
-import Box, { type BoxProps } from '@mui/material/Box';
+import { cn } from '../../lib/utils';
 import { MRT_FilterTextField } from './MRT_FilterTextField';
 import {
   type MRT_Header,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { parseFromValuesOrFunc } from '../../utils/utils';
 
-export interface MRT_FilterRangeFieldsProps<TData extends MRT_RowData>
-  extends BoxProps {
+export interface MRT_FilterRangeFieldsProps<TData extends MRT_RowData> {
   header: MRT_Header<TData>;
   table: MRT_TableInstance<TData>;
+  className?: string;
 }
 
 export const MRT_FilterRangeFields = <TData extends MRT_RowData>({
   header,
   table,
-  ...rest
+  className,
 }: MRT_FilterRangeFieldsProps<TData>) => {
   return (
-    <Box
-      {...rest}
-      sx={(theme) => ({
-        display: 'grid',
-        gap: '1rem',
-        gridTemplateColumns: '1fr 1fr',
-        ...(parseFromValuesOrFunc(rest?.sx, theme) as any),
-      })}
-    >
+    <div className={cn('grid grid-cols-2 gap-4', className)}>
       {[0, 1].map((rangeFilterIndex) => (
         <MRT_FilterTextField
           header={header}
@@ -36,6 +27,6 @@ export const MRT_FilterRangeFields = <TData extends MRT_RowData>({
           table={table}
         />
       ))}
-    </Box>
+    </div>
   );
 };

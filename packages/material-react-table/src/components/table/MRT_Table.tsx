@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import Table, { type TableProps } from '@mui/material/Table';
 import { useMRT_ColumnVirtualizer } from '../../hooks/useMRT_ColumnVirtualizer';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
 import { parseCSSVarId } from '../../utils/style.utils';
@@ -7,13 +6,17 @@ import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_TableBody, Memo_MRT_TableBody } from '../body/MRT_TableBody';
 import { MRT_TableFooter } from '../footer/MRT_TableFooter';
 import { MRT_TableHead } from '../head/MRT_TableHead';
+import { cn } from '../../lib/utils';
 
-export interface MRT_TableProps<TData extends MRT_RowData> extends TableProps {
+export interface MRT_TableProps<TData extends MRT_RowData>
+  extends React.HTMLAttributes<HTMLTableElement> {
   table: MRT_TableInstance<TData>;
 }
 
 export const MRT_Table = <TData extends MRT_RowData>({
   table,
+  className,
+  style,
   ...rest
 }: MRT_TableProps<TData>) => {
   const {
@@ -27,14 +30,16 @@ export const MRT_Table = <TData extends MRT_RowData>({
       layoutMode,
       memoMode,
       muiTableProps,
+      tableProps,
       renderCaption,
     },
   } = table;
   const { columnSizing, columnSizingInfo, columnVisibility, isFullScreen } =
     getState();
 
-  const tableProps = {
-    ...parseFromValuesOrFunc(muiTableProps, { table }),
+  // Support both old (muiTableProps) and new (tableProps) prop names for backward compatibility
+  const resolvedTableProps = {
+    ...parseFromValuesOrFunc(tableProps ?? muiTableProps, { table }),
     ...rest,
   };
 
@@ -59,19 +64,28 @@ export const MRT_Table = <TData extends MRT_RowData>({
     table,
   };
 
+  // Determine if sticky header should be enabled
+  const isStickyHeader = enableStickyHeader || isFullScreen;
+
   return (
-    <Table
-      stickyHeader={enableStickyHeader || isFullScreen}
-      {...tableProps}
-      style={{ ...columnSizeVars, ...tableProps?.style }}
-      sx={(theme) => ({
-        borderCollapse: 'separate',
-        display: layoutMode?.startsWith('grid') ? 'grid' : undefined,
-        position: 'relative',
-        ...(parseFromValuesOrFunc(tableProps?.sx, theme) as any),
-      })}
+    <table
+      {...resolvedTableProps}
+      className={cn(
+        'w-full caption-bottom text-sm',
+        'border-separate border-spacing-0',
+        layoutMode?.startsWith('grid') && 'grid',
+        'relative',
+        isStickyHeader && '[&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10',
+        className,
+        resolvedTableProps?.className
+      )}
+      style={{
+        ...columnSizeVars,
+        ...style,
+        ...resolvedTableProps?.style,
+      }}
     >
-      {!!Caption && <caption>{Caption}</caption>}
+      {!!Caption && <caption className="mt-4 text-sm text-muted-foreground">{Caption}</caption>}
       {enableTableHead && <MRT_TableHead {...commonTableGroupProps} />}
       {memoMode === 'table-body' || columnSizingInfo.isResizingColumn ? (
         <Memo_MRT_TableBody {...commonTableGroupProps} />
@@ -79,6 +93,6 @@ export const MRT_Table = <TData extends MRT_RowData>({
         <MRT_TableBody {...commonTableGroupProps} />
       )}
       {enableTableFooter && <MRT_TableFooter {...commonTableGroupProps} />}
-    </Table>
+    </table>
   );
 };

@@ -1,11 +1,7 @@
 import { useState } from 'react';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Edit from '@mui/icons-material/Edit';
-import ShareIcon from '@mui/icons-material/Share';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuItem from '@mui/material/MenuItem';
+import { User, Trash2, Pencil, Share } from 'lucide-react';
+import { Button } from '../../src/components/ui/button';
+import { DropdownMenuItem } from '../../src/components/ui/dropdown-menu';
 import { type MRT_ColumnDef, MaterialReactTable } from '../../src';
 import { faker } from '@faker-js/faker';
 import { type Meta } from '@storybook/react';
@@ -53,33 +49,33 @@ export const RowActionsEnabled = () => (
     data={data}
     enableRowActions
     renderRowActionMenuItems={({ closeMenu, row }) => [
-      <MenuItem
+      <DropdownMenuItem
         key={1}
         onClick={() => {
           console.info('View Profile', row);
           closeMenu();
         }}
       >
-        <AccountCircleIcon /> View Profile
-      </MenuItem>,
-      <MenuItem
+        <User className="mr-2 h-4 w-4" /> View Profile
+      </DropdownMenuItem>,
+      <DropdownMenuItem
         key={2}
         onClick={() => {
           console.info('Remove', row);
           closeMenu();
         }}
       >
-        <DeleteIcon /> Remove
-      </MenuItem>,
-      <MenuItem
+        <Trash2 className="mr-2 h-4 w-4" /> Remove
+      </DropdownMenuItem>,
+      <DropdownMenuItem
         key={3}
         onClick={() => {
           console.info('Share', row);
           closeMenu();
         }}
       >
-        <ShareIcon /> Share
-      </MenuItem>,
+        <Share className="mr-2 h-4 w-4" /> Share
+      </DropdownMenuItem>,
     ]}
   />
 );
@@ -92,33 +88,33 @@ export const RowActionsEnabledConditionally = () => {
       data={data}
       enableRowActions={enabled}
       renderRowActionMenuItems={({ closeMenu, row }) => [
-        <MenuItem
+        <DropdownMenuItem
           key={1}
           onClick={() => {
             console.info('View Profile', row);
             closeMenu();
           }}
         >
-          <AccountCircleIcon /> View Profile
-        </MenuItem>,
-        <MenuItem
+          <User className="mr-2 h-4 w-4" /> View Profile
+        </DropdownMenuItem>,
+        <DropdownMenuItem
           key={2}
           onClick={() => {
             console.info('Remove', row);
             closeMenu();
           }}
         >
-          <DeleteIcon /> Remove
-        </MenuItem>,
-        <MenuItem
+          <Trash2 className="mr-2 h-4 w-4" /> Remove
+        </DropdownMenuItem>,
+        <DropdownMenuItem
           key={3}
           onClick={() => {
             console.info('Share', row);
             closeMenu();
           }}
         >
-          <ShareIcon /> Share
-        </MenuItem>,
+          <Share className="mr-2 h-4 w-4" /> Share
+        </DropdownMenuItem>,
       ]}
       renderTopToolbarCustomActions={() => (
         <Button onClick={() => setEnabled(!enabled)}>Toggle Row Actions</Button>
@@ -137,33 +133,33 @@ export const RowActionsEnabledConditionallyPerRow = () => {
         row.index % 2 === 0
           ? undefined
           : [
-              <MenuItem
+              <DropdownMenuItem
                 key={1}
                 onClick={() => {
                   console.info('View Profile', row);
                   closeMenu();
                 }}
               >
-                <AccountCircleIcon /> View Profile
-              </MenuItem>,
-              <MenuItem
+                <User className="mr-2 h-4 w-4" /> View Profile
+              </DropdownMenuItem>,
+              <DropdownMenuItem
                 key={2}
                 onClick={() => {
                   console.info('Remove', row);
                   closeMenu();
                 }}
               >
-                <DeleteIcon /> Remove
-              </MenuItem>,
-              <MenuItem
+                <Trash2 className="mr-2 h-4 w-4" /> Remove
+              </DropdownMenuItem>,
+              <DropdownMenuItem
                 key={3}
                 onClick={() => {
                   console.info('Share', row);
                   closeMenu();
                 }}
               >
-                <ShareIcon /> Share
-              </MenuItem>,
+                <Share className="mr-2 h-4 w-4" /> Share
+              </DropdownMenuItem>,
             ]
       }
     />
@@ -177,33 +173,33 @@ export const RowActionsAndEditingEnabled = () => (
     enableEditing
     enableRowActions
     renderRowActionMenuItems={({ closeMenu, row }) => [
-      <MenuItem
+      <DropdownMenuItem
         key={1}
         onClick={() => {
           console.info('View Profile', row);
           closeMenu();
         }}
       >
-        <AccountCircleIcon /> View Profile
-      </MenuItem>,
-      <MenuItem
+        <User className="mr-2 h-4 w-4" /> View Profile
+      </DropdownMenuItem>,
+      <DropdownMenuItem
         key={2}
         onClick={() => {
           console.info('Remove', row);
           closeMenu();
         }}
       >
-        <DeleteIcon /> Remove
-      </MenuItem>,
-      <MenuItem
+        <Trash2 className="mr-2 h-4 w-4" /> Remove
+      </DropdownMenuItem>,
+      <DropdownMenuItem
         key={3}
         onClick={() => {
           console.info('Share', row);
           closeMenu();
         }}
       >
-        <ShareIcon /> Share
-      </MenuItem>,
+        <Share className="mr-2 h-4 w-4" /> Share
+      </DropdownMenuItem>,
     ]}
   />
 );
@@ -216,33 +212,33 @@ export const RowActionsAndEditingCellEnabled = () => (
     enableEditing
     enableRowActions
     renderRowActionMenuItems={({ closeMenu, row }) => [
-      <MenuItem
+      <DropdownMenuItem
         key={1}
         onClick={() => {
           console.info('View Profile', row);
           closeMenu();
         }}
       >
-        <AccountCircleIcon /> View Profile
-      </MenuItem>,
-      <MenuItem
+        <User className="mr-2 h-4 w-4" /> View Profile
+      </DropdownMenuItem>,
+      <DropdownMenuItem
         key={2}
         onClick={() => {
           console.info('Remove', row);
           closeMenu();
         }}
       >
-        <DeleteIcon /> Remove
-      </MenuItem>,
-      <MenuItem
+        <Trash2 className="mr-2 h-4 w-4" /> Remove
+      </DropdownMenuItem>,
+      <DropdownMenuItem
         key={3}
         onClick={() => {
           console.info('Share', row);
           closeMenu();
         }}
       >
-        <ShareIcon /> Share
-      </MenuItem>,
+        <Share className="mr-2 h-4 w-4" /> Share
+      </DropdownMenuItem>,
     ]}
   />
 );
@@ -255,33 +251,33 @@ export const RowActionsLastColumn = () => (
     initialState={{ density: 'compact' }}
     positionActionsColumn="last"
     renderRowActionMenuItems={({ closeMenu, row }) => [
-      <MenuItem
+      <DropdownMenuItem
         key={1}
         onClick={() => {
           console.info('View Profile', row);
           closeMenu();
         }}
       >
-        <AccountCircleIcon /> View Profile
-      </MenuItem>,
-      <MenuItem
+        <User className="mr-2 h-4 w-4" /> View Profile
+      </DropdownMenuItem>,
+      <DropdownMenuItem
         key={2}
         onClick={() => {
           console.info('Remove', row);
           closeMenu();
         }}
       >
-        <DeleteIcon /> Remove
-      </MenuItem>,
-      <MenuItem
+        <Trash2 className="mr-2 h-4 w-4" /> Remove
+      </DropdownMenuItem>,
+      <DropdownMenuItem
         key={3}
         onClick={() => {
           console.info('Share', row);
           closeMenu();
         }}
       >
-        <ShareIcon /> Share
-      </MenuItem>,
+        <Share className="mr-2 h-4 w-4" /> Share
+      </DropdownMenuItem>,
     ]}
   />
 );
@@ -292,22 +288,19 @@ export const CustomRowActionButtons = () => (
     data={data}
     enableRowActions
     renderRowActions={({ row }) => (
-      <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '0.5rem' }}>
+      <div className="flex flex-nowrap gap-2">
         <Button
-          color="primary"
           onClick={() => {
             console.info('View Profile', row);
           }}
-          variant="contained"
         >
           View
         </Button>
         <Button
-          color="error"
+          variant="destructive"
           onClick={() => {
             console.info('Remove', row);
           }}
-          variant="contained"
         >
           Remove
         </Button>
@@ -323,22 +316,19 @@ export const CustomRowActionButtonsLastColumn = () => (
     enableRowActions
     positionActionsColumn="last"
     renderRowActions={({ row }) => (
-      <div style={{ display: 'flex', flexWrap: 'nowrap', gap: '0.5rem' }}>
+      <div className="flex flex-nowrap gap-2">
         <Button
-          color="primary"
           onClick={() => {
             console.info('View Profile', row);
           }}
-          variant="contained"
         >
           View
         </Button>
         <Button
-          color="error"
+          variant="destructive"
           onClick={() => {
             console.info('Remove', row);
           }}
-          variant="contained"
         >
           Remove
         </Button>
@@ -354,12 +344,16 @@ export const RowActionsCompleteOverride = () => (
     displayColumnDefOptions={{
       'mrt-row-actions': {
         Cell: ({ row, table }) => (
-          <>
-            <Button variant="contained">Custom Row Action</Button>
-            <IconButton onClick={() => table.setEditingRow(row)}>
-              <Edit />
-            </IconButton>
-          </>
+          <div className="flex items-center gap-2">
+            <Button>Custom Row Action</Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => table.setEditingRow(row)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </div>
         ),
         size: 300,
       },

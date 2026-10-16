@@ -28,7 +28,7 @@ const Example = () => {
         accessorKey: 'salary',
         header: 'Salary',
         Cell: ({ cell }) =>
-          cell.getValue<number>().toLocaleString('en-US', {
+          (cell.getValue() as number).toLocaleString('en-US', {
             style: 'currency',
             currency: 'USD',
           }),
@@ -70,7 +70,7 @@ const Example = () => {
         id: 'hireDate',
         header: 'Hire Date',
         filterVariant: 'date-range',
-        Cell: ({ cell }) => cell.getValue<Date>().toLocaleDateString(), // convert back to string for display
+        Cell: ({ cell }) => (cell.getValue() as Date).toLocaleDateString(), // convert back to string for display
       },
       {
         accessorFn: (originalRow) => new Date(originalRow.arrivalTime), //convert to date for sorting and filtering
@@ -78,8 +78,8 @@ const Example = () => {
         header: 'Arrival Time',
         filterVariant: 'datetime-range',
         Cell: ({ cell }) =>
-          `${cell.getValue<Date>().toLocaleDateString()} ${cell
-            .getValue<Date>()
+          `${(cell.getValue() as Date).toLocaleDateString()} ${(cell
+            .getValue() as Date)
             .toLocaleTimeString()}`, // convert back to string for display
       },
       {
@@ -87,7 +87,7 @@ const Example = () => {
         id: 'departureTime',
         header: 'Departure Time',
         filterVariant: 'time-range',
-        Cell: ({ cell }) => cell.getValue<Date>().toLocaleTimeString(), // convert back to string for display
+        Cell: ({ cell }) => (cell.getValue() as Date).toLocaleTimeString(), // convert back to string for display
       },
     ],
     [],

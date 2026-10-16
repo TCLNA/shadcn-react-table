@@ -1,9 +1,8 @@
-import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
+import { MRT_IconButton, type MRT_IconButtonProps } from './MRT_IconButton';
 
 export interface MRT_ToggleDensePaddingButtonProps<TData extends MRT_RowData>
-  extends IconButtonProps {
+  extends Omit<MRT_IconButtonProps, 'tooltip'> {
   table: MRT_TableInstance<TData>;
 }
 
@@ -32,21 +31,19 @@ export const MRT_ToggleDensePaddingButton = <TData extends MRT_RowData>({
   };
 
   return (
-    <Tooltip title={rest?.title ?? localization.toggleDensity}>
-      <IconButton
-        aria-label={localization.toggleDensity}
-        onClick={handleToggleDensePadding}
-        {...rest}
-        title={undefined}
-      >
-        {density === 'compact' ? (
-          <DensitySmallIcon />
-        ) : density === 'comfortable' ? (
-          <DensityMediumIcon />
-        ) : (
-          <DensityLargeIcon />
-        )}
-      </IconButton>
-    </Tooltip>
+    <MRT_IconButton
+      aria-label={localization.toggleDensity}
+      onClick={handleToggleDensePadding}
+      tooltip={localization.toggleDensity}
+      {...rest}
+    >
+      {density === 'compact' ? (
+        <DensitySmallIcon />
+      ) : density === 'comfortable' ? (
+        <DensityMediumIcon />
+      ) : (
+        <DensityLargeIcon />
+      )}
+    </MRT_IconButton>
   );
 };

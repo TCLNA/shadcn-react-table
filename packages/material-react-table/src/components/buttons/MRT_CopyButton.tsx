@@ -1,16 +1,21 @@
 import { type MouseEvent, useState } from 'react';
-import Button, { type ButtonProps } from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
 import {
   type MRT_Cell,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { getCommonTooltipProps } from '../../utils/style.utils';
+import { MRT_Button, type MRT_ButtonProps } from './MRT_Button';
 import { parseFromValuesOrFunc } from '../../utils/utils';
+import { cn } from '../../lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip';
 
 export interface MRT_CopyButtonProps<TData extends MRT_RowData>
-  extends ButtonProps {
+  extends Omit<MRT_ButtonProps, 'onClick'> {
   cell: MRT_Cell<TData>;
   table: MRT_TableInstance<TData>;
 }
@@ -51,37 +56,28 @@ export const MRT_CopyButton = <TData extends MRT_RowData>({
     ...rest,
   };
 
+  const tooltipTitle =
+    copied ? localization.copiedToClipboard : localization.clickToCopy;
+
   return (
-    <Tooltip
-      {...getCommonTooltipProps('top')}
-      title={
-        buttonProps?.title ??
-        (copied ? localization.copiedToClipboard : localization.clickToCopy)
-      }
-    >
-      <Button
-        onClick={(e) => handleCopy(e, cell.getValue())}
-        size="small"
-        type="button"
-        variant="text"
-        {...buttonProps}
-        sx={(theme) => ({
-          backgroundColor: 'transparent',
-          border: 'none',
-          color: 'inherit',
-          cursor: 'copy',
-          fontFamily: 'inherit',
-          fontSize: 'inherit',
-          letterSpacing: 'inherit',
-          m: '-0.25rem',
-          minWidth: 'unset',
-          py: 0,
-          textAlign: 'inherit',
-          textTransform: 'inherit',
-          ...(parseFromValuesOrFunc(buttonProps?.sx, theme) as any),
-        })}
-        title={undefined}
-      />
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <MRT_Button
+            onClick={(e) => handleCopy(e, cell.getValue())}
+            size="sm"
+            variant="ghost"
+            className={cn(
+              'bg-transparent border-none text-inherit cursor-copy',
+              'font-inherit text-inherit tracking-inherit text-left',
+              '-m-1 min-w-0 py-0',
+              buttonProps?.className,
+            )}
+            {...buttonProps}
+          />
+        </TooltipTrigger>
+        <TooltipContent side="top">{tooltipTitle}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };

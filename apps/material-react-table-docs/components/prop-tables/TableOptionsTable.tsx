@@ -30,7 +30,7 @@ const TableOptionsTable = ({ onlyOptions }: Props) => {
         accessorKey: 'tableOption',
         muiCopyButtonProps: ({ cell }) => ({
           className: 'prop',
-          id: `${cell.getValue<string>()}-prop`,
+          id: `${(cell.getValue() as string)}-prop`,
         }),
         Cell: ({ renderedCellValue, row }) =>
           row.original?.required ? (
@@ -57,7 +57,7 @@ const TableOptionsTable = ({ onlyOptions }: Props) => {
               minHeight: 'unset',
             }}
           >
-            {cell.getValue<string>()}
+            {(cell.getValue() as string)}
           </SampleCodeSnippet>
         ),
       },
@@ -77,7 +77,7 @@ const TableOptionsTable = ({ onlyOptions }: Props) => {
               minHeight: 'unset',
             }}
           >
-            {cell.getValue<string>()}
+            {(cell.getValue() as string)}
           </SampleCodeSnippet>
         ),
       },
@@ -92,7 +92,7 @@ const TableOptionsTable = ({ onlyOptions }: Props) => {
         disableFilters: true,
         enableGlobalFilter: false,
         Cell: ({ cell, row }) => (
-          <Link href={cell.getValue<string>()} passHref legacyBehavior>
+          <Link href={(cell.getValue() as string)} passHref legacyBehavior>
             <MuiLink
               color={
                 row.original.source === 'MRT'
@@ -104,7 +104,7 @@ const TableOptionsTable = ({ onlyOptions }: Props) => {
                       : undefined
               }
               target={
-                cell.getValue<string>().startsWith('http')
+                (cell.getValue() as string).startsWith('http')
                   ? '_blank'
                   : undefined
               }

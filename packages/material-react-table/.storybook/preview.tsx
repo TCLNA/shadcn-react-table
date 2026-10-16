@@ -2,22 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { addons } from '@storybook/preview-api';
 import { Preview } from '@storybook/react';
 import { useDarkMode, DARK_MODE_EVENT_NAME } from 'storybook-dark-mode';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { CssBaseline } from '@mui/material';
+import '../src/styles/globals.css';
 
 const channel = addons.getChannel();
-
-const lightTheme = createTheme({
-  palette: { mode: 'light' },
-});
-
-const darkTheme = createTheme({
-  palette: { mode: 'dark' },
-});
 
 const preview: Preview = {
   parameters: {
@@ -32,18 +19,29 @@ const preview: Preview = {
   decorators: [
     (Story, context) => {
       const [isDark, setDark] = useState(true);
-      const theme = isDark ? darkTheme : lightTheme;
 
       useEffect(() => {
         const sbRoot = document.getElementsByClassName(
           'sb-show-main',
         )[0] as HTMLElement;
+        const htmlElement = document.documentElement;
+        
         channel.on(DARK_MODE_EVENT_NAME, setDark);
-        if (sbRoot) {
-          sbRoot.style.backgroundColor = theme.palette.background.default;
+        
+        // Apply dark mode class to html element for Tailwind
+        if (isDark) {
+          htmlElement.classList.add('dark');
+        } else {
+          htmlElement.classList.remove('dark');
         }
+        
+        // Update Storybook background
+        if (sbRoot) {
+          sbRoot.style.backgroundColor = isDark ? 'hsl(222.2 84% 4.9%)' : 'hsl(0 0% 100%)';
+        }
+        
         return () => channel.off(DARK_MODE_EVENT_NAME, setDark);
-      }, [theme]);
+      }, [isDark]);
 
       useEffect(() => {
         if (process.env.NODE_ENV === 'development') return;
@@ -59,43 +57,30 @@ const preview: Preview = {
       }, []);
 
       return (
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Typography
-              sx={{
-                pb: '0.5rem',
-                color: useDarkMode() ? '#fff' : '#666',
-              }}
-              variant="subtitle2"
+        <div className="min-h-screen bg-background text-foreground">
+          <p className="pb-2 text-sm text-muted-foreground">
+            Looking for the main docs site? Click{' '}
+            <a
+              href="https://www.material-react-table.com"
+              target="_blank"
+              rel="noopener"
+              className="text-primary hover:underline"
             >
-              Looking for the main docs site? Click{' '}
-              <Link
-                href="https://www.material-react-table.com"
-                target="_blank"
-                rel="noopener"
-              >
-                here.
-              </Link>
-            </Typography>
-            <Typography
-              variant="subtitle2"
-              sx={{
-                pb: '1rem',
-                color: useDarkMode() ? '#fff' : '#666',
-              }}
+              here.
+            </a>
+          </p>
+          <p className="pb-4 text-sm text-muted-foreground">
+            View Source code for these examples in the code tab below or{' '}
+            <a
+              href="https://github.com/KevinVandy/material-react-table/tree/v3/packages/material-react-table/stories/features"
+              target="_blank"
+              className="text-primary hover:underline"
             >
-              View Source code for these examples in the code tab below or{' '}
-              <Link
-                href="https://github.com/KevinVandy/material-react-table/tree/v3/packages/material-react-table/stories/features"
-                target="_blank"
-              >
-                here on GitHub.
-              </Link>
-            </Typography>
-            <Story {...context} />
-          </LocalizationProvider>
-        </ThemeProvider>
+              here on GitHub.
+            </a>
+          </p>
+          <Story {...context} />
+        </div>
       );
     },
   ],

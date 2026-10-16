@@ -85,20 +85,20 @@ export const CompatibilityTable = () => {
     data,
     defaultColumn: {
       muiTableHeadCellProps: {
-        sx: {
+        style: {
           fontSize: '16px',
         },
       },
       muiTableBodyCellProps: ({ row }) => ({
-        sx: (theme) => ({
+        style: {
           fontSize: '16px',
           fontWeight: row.original.mrtVersion.includes('This Version')
             ? 'bold'
             : 'normal',
           color: row.original.mrtVersion.includes('This Version')
-            ? `${theme.palette.primary.main}`
+            ? 'hsl(var(--primary))'
             : 'inherit',
-        }),
+        },
       }),
     },
     enableColumnActions: false,

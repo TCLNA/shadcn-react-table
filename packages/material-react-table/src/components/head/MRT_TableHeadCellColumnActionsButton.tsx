@@ -1,14 +1,24 @@
 import { type MouseEvent, useState } from 'react';
-import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import { Button } from '../ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import {
   type MRT_Header,
   type MRT_RowData,
   type MRT_TableInstance,
 } from '../../types';
-import { getCommonTooltipProps } from '../../utils/style.utils';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_ColumnActionMenu } from '../menus/MRT_ColumnActionMenu';
+import { cn } from '../../lib/utils';
+
+// IconButtonProps type for compatibility
+interface IconButtonProps {
+  onClick?: (event: MouseEvent<HTMLElement>) => void;
+  disabled?: boolean;
+  className?: string;
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  title?: string;
+  children?: React.ReactNode;
+}
 
 export interface MRT_TableHeadCellColumnActionsButtonProps<
   TData extends MRT_RowData,
@@ -56,32 +66,27 @@ export const MRT_TableHeadCellColumnActionsButton = <
 
   return (
     <>
-      <Tooltip
-        {...getCommonTooltipProps('top')}
-        title={iconButtonProps?.title ?? localization.columnActions}
-      >
-        <IconButton
-          aria-label={localization.columnActions}
-          onClick={handleClick}
-          size="small"
-          {...iconButtonProps}
-          sx={(theme) => ({
-            '&:hover': {
-              opacity: 1,
-            },
-            height: '2rem',
-            m: '-8px -4px',
-            opacity: 0.3,
-            transition: 'all 150ms',
-            width: '2rem',
-            ...(parseFromValuesOrFunc(iconButtonProps?.sx, theme) as any),
-          })}
-          title={undefined}
-        >
-          {iconButtonProps?.children ?? (
-            <MoreVertIcon style={{ transform: 'scale(0.9)' }} />
-          )}
-        </IconButton>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={localization.columnActions}
+            onClick={handleClick}
+            className={cn(
+              "h-8 w-8 -m-2 opacity-30 hover:opacity-100 transition-all duration-150",
+              iconButtonProps?.className
+            )}
+            {...iconButtonProps}
+          >
+            {iconButtonProps?.children ?? (
+              <MoreVertIcon style={{ transform: 'scale(0.9)' }} />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          {iconButtonProps?.title ?? localization.columnActions}
+        </TooltipContent>
       </Tooltip>
       {anchorEl && (
         <MRT_ColumnActionMenu

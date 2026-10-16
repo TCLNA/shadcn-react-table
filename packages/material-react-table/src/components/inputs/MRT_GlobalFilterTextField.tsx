@@ -6,23 +6,44 @@ import {
   useRef,
   useState,
 } from 'react';
-import Collapse from '@mui/material/Collapse';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import TextField, { type TextFieldProps } from '@mui/material/TextField';
-import Tooltip from '@mui/material/Tooltip';
-import { debounce } from '@mui/material/utils';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip';
+import { Collapsible, CollapsibleContent } from '../ui/collapsible';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_FilterOptionMenu } from '../menus/MRT_FilterOptionMenu';
+import { cn } from '../../lib/utils';
 
-export interface MRT_GlobalFilterTextFieldProps<TData extends MRT_RowData>
-  extends TextFieldProps<'standard'> {
+// Custom debounce utility (replaces MUI's debounce)
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  return (...args: Parameters<T>) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+export interface MRT_GlobalFilterTextFieldProps<TData extends MRT_RowData> {
   table: MRT_TableInstance<TData>;
+  className?: string;
+  placeholder?: string;
+  value?: string;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
 export const MRT_GlobalFilterTextField = <TData extends MRT_RowData>({
   table,
+  className,
   ...rest
 }: MRT_GlobalFilterTextFieldProps<TData>) => {
   const {
@@ -86,78 +107,78 @@ export const MRT_GlobalFilterTextField = <TData extends MRT_RowData>({
   }, [globalFilter]);
 
   return (
-    <Collapse
-      in={showGlobalFilter}
-      mountOnEnter
-      orientation="horizontal"
-      unmountOnExit
-    >
-      <TextField
-        inputProps={{
-          autoComplete: 'off',
-          ...textFieldProps.inputProps,
-        }}
-        onChange={handleChange}
-        placeholder={localization.search}
-        size="small"
-        value={searchValue ?? ''}
-        variant="outlined"
-        {...textFieldProps}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <Tooltip title={localization.clearSearch ?? ''}>
-                <span>
-                  <IconButton
-                    aria-label={localization.clearSearch}
-                    disabled={!searchValue?.length}
-                    onClick={handleClear}
-                    size="small"
+    <Collapsible open={showGlobalFilter}>
+      <CollapsibleContent className="overflow-visible">
+        <div className={cn('relative inline-flex items-center', className)}>
+          {/* Start adornment - Search icon or filter mode button */}
+          {enableGlobalFilterModes ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute left-2 h-7 w-7 z-10"
+                    onClick={handleGlobalFilterMenuOpen}
+                    aria-label={localization.changeSearchMode}
                   >
-                    <CloseIcon />
-                  </IconButton>
-                </span>
+                    <SearchIcon className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{localization.changeSearchMode}</p>
+                </TooltipContent>
               </Tooltip>
-            </InputAdornment>
-          ),
-          startAdornment: enableGlobalFilterModes ? (
-            <InputAdornment position="start">
-              <Tooltip title={localization.changeSearchMode}>
-                <IconButton
-                  aria-label={localization.changeSearchMode}
-                  onClick={handleGlobalFilterMenuOpen}
-                  size="small"
-                  sx={{ height: '1.75rem', width: '1.75rem' }}
-                >
-                  <SearchIcon />
-                </IconButton>
-              </Tooltip>
-            </InputAdornment>
+            </TooltipProvider>
           ) : (
-            <SearchIcon style={{ marginRight: '4px' }} />
-          ),
-          ...textFieldProps.InputProps,
-          sx: (theme) => ({
-            mb: 0,
-            ...(parseFromValuesOrFunc(
-              textFieldProps?.InputProps?.sx,
-              theme,
-            ) as any),
-          }),
-        }}
-        inputRef={(inputRef) => {
-          searchInputRef.current = inputRef;
-          if (textFieldProps?.inputRef) {
-            textFieldProps.inputRef = inputRef;
-          }
-        }}
-      />
+            <SearchIcon className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+          )}
+
+          {/* Input field */}
+          <Input
+            ref={searchInputRef}
+            type="text"
+            placeholder={textFieldProps.placeholder ?? localization.search}
+            value={searchValue ?? ''}
+            onChange={handleChange}
+            disabled={textFieldProps.disabled}
+            autoComplete="off"
+            className={cn(
+              'h-9 pr-10',
+              enableGlobalFilterModes ? 'pl-10' : 'pl-9',
+              textFieldProps.className,
+            )}
+            {...textFieldProps}
+          />
+
+          {/* End adornment - Clear button */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 h-7 w-7"
+                  onClick={handleClear}
+                  disabled={!searchValue?.length}
+                  aria-label={localization.clearSearch}
+                >
+                  <CloseIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{localization.clearSearch ?? ''}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </CollapsibleContent>
       <MRT_FilterOptionMenu
         anchorEl={anchorEl}
         onSelect={handleClear}
         setAnchorEl={setAnchorEl}
         table={table}
       />
-    </Collapse>
+    </Collapsible>
   );
 };

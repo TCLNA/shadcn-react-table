@@ -7,9 +7,8 @@ import {
   useMemo,
   useState,
 } from 'react';
-import Skeleton from '@mui/material/Skeleton';
-import TableCell, { type TableCellProps } from '@mui/material/TableCell';
-import { useTheme } from '@mui/material/styles';
+import { Skeleton } from '../ui/skeleton';
+import { TableCell } from '../ui/table';
 import { MRT_TableBodyCellValue } from './MRT_TableBodyCellValue';
 import {
   type MRT_Cell,
@@ -21,13 +20,13 @@ import {
   cellKeyboardShortcuts,
   openEditingCell,
 } from '../../utils/cell.utils';
-import { getCommonMRTCellStyles } from '../../utils/style.utils';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_CopyButton } from '../buttons/MRT_CopyButton';
 import { MRT_EditCellTextField } from '../inputs/MRT_EditCellTextField';
+import { cn } from '../../lib/utils';
 
 export interface MRT_TableBodyCellProps<TData extends MRT_RowData>
-  extends TableCellProps {
+  extends React.TdHTMLAttributes<HTMLTableCellElement> {
   cell: MRT_Cell<TData>;
   numRows?: number;
   rowRef: RefObject<HTMLTableRowElement | null>;
@@ -45,7 +44,6 @@ export const MRT_TableBodyCell = <TData extends MRT_RowData>({
   table,
   ...rest
 }: MRT_TableBodyCellProps<TData>) => {
-  const theme = useTheme();
   const {
     getState,
     options: {
@@ -121,12 +119,13 @@ export const MRT_TableBodyCell = <TData extends MRT_RowData>({
     const showResizeBorder =
       isResizingColumn && columnResizeMode === 'onChange';
 
+    const borderColor = draggingBorderColor || 'hsl(var(--primary))';
     const borderStyle = showResizeBorder
-      ? `2px solid ${draggingBorderColor} !important`
+      ? `2px solid ${borderColor}`
       : isDraggingColumn || isDraggingRow
-        ? `1px dashed ${theme.palette.grey[500]} !important`
+        ? `1px dashed hsl(var(--muted-foreground))`
         : isHoveredColumn || isHoveredRow || isResizingColumn
-          ? `2px dashed ${draggingBorderColor} !important`
+          ? `2px dashed ${borderColor}`
           : undefined;
 
     if (showResizeBorder) {
@@ -242,9 +241,46 @@ export const MRT_TableBodyCell = <TData extends MRT_RowData>({
     });
   };
 
+  // Determine padding based on density
+  const getPaddingClasses = () => {
+    if (density === 'compact') {
+      return columnDefType === 'display' ? 'px-2 py-0' : 'p-2';
+    } else if (density === 'comfortable') {
+      return columnDefType === 'display' ? 'px-3 py-2' : 'p-4';
+    } else {
+      return columnDefType === 'display' ? 'px-5 py-4' : 'p-6';
+    }
+  };
+
+  // Determine cursor style
+  const getCursorClass = () => {
+    if (isRightClickable) return 'cursor-context-menu';
+    if (isEditable && editDisplayMode === 'cell') return 'cursor-pointer';
+    return '';
+  };
+
+  // Determine outline styles
+  const getOutlineClasses = () => {
+    const hasOutline =
+      actionCell?.id === cell.id ||
+      (editDisplayMode === 'cell' && isEditable) ||
+      (editDisplayMode === 'table' && (isCreating || isEditing));
+    
+    return hasOutline ? 'outline outline-1 outline-muted-foreground -outline-offset-1' : '';
+  };
+
+  // Hover outline
+  const getHoverClasses = () => {
+    const shouldShowHoverOutline =
+      actionCell?.id === cell.id ||
+      (editDisplayMode === 'cell' && isEditable) ||
+      (editDisplayMode === 'table' && (isCreating || isEditing));
+    
+    return shouldShowHoverOutline ? 'hover:outline hover:outline-1 hover:outline-muted-foreground hover:-outline-offset-1' : '';
+  };
+
   return (
     <TableCell
-      align={theme.direction === 'rtl' ? 'right' : 'left'}
       data-index={staticColumnIndex}
       data-pinned={!!isColumnPinned || undefined}
       tabIndex={enableKeyboardShortcuts ? 0 : undefined}
@@ -254,52 +290,23 @@ export const MRT_TableBodyCell = <TData extends MRT_RowData>({
       onDoubleClick={handleDoubleClick}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
-      sx={(theme) => ({
-        '&:hover': {
-          outline:
-            actionCell?.id === cell.id ||
-            (editDisplayMode === 'cell' && isEditable) ||
-            (editDisplayMode === 'table' && (isCreating || isEditing))
-              ? `1px solid ${theme.palette.grey[500]}`
-              : undefined,
-          textOverflow: 'clip',
-        },
-        alignItems: layoutMode?.startsWith('grid') ? 'center' : undefined,
-        cursor: isRightClickable
-          ? 'context-menu'
-          : isEditable && editDisplayMode === 'cell'
-            ? 'pointer'
-            : 'inherit',
-        outline:
-          actionCell?.id === cell.id
-            ? `1px solid ${theme.palette.grey[500]}`
-            : undefined,
-        outlineOffset: '-1px',
-        overflow: 'hidden',
-        p:
-          density === 'compact'
-            ? columnDefType === 'display'
-              ? '0 0.5rem'
-              : '0.5rem'
-            : density === 'comfortable'
-              ? columnDefType === 'display'
-                ? '0.5rem 0.75rem'
-                : '1rem'
-              : columnDefType === 'display'
-                ? '1rem 1.25rem'
-                : '1.5rem',
-
-        textOverflow: columnDefType !== 'display' ? 'ellipsis' : undefined,
-        whiteSpace:
-          row.getIsPinned() || density === 'compact' ? 'nowrap' : 'normal',
-        ...getCommonMRTCellStyles({
-          column,
-          table,
-          tableCellProps,
-          theme,
-        }),
+      style={{
         ...draggingBorders,
-      })}
+        ...(tableCellProps?.style || {}),
+      }}
+      className={cn(
+        'relative overflow-hidden',
+        getPaddingClasses(),
+        getCursorClass(),
+        getOutlineClasses(),
+        getHoverClasses(),
+        layoutMode?.startsWith('grid') && 'flex items-center',
+        columnDefType !== 'display' && 'truncate',
+        (row.getIsPinned() || density === 'compact') && 'whitespace-nowrap',
+        density !== 'compact' && 'whitespace-normal',
+        'focus-visible:outline-2 focus-visible:outline-primary focus-visible:-outline-offset-2',
+        tableCellProps?.className,
+      )}
     >
       {tableCellProps.children ?? (
         <>
@@ -307,9 +314,8 @@ export const MRT_TableBodyCell = <TData extends MRT_RowData>({
             (columnDef.PlaceholderCell?.({ cell, column, row, table }) ?? null)
           ) : showSkeletons !== false && (isLoading || showSkeletons) ? (
             <Skeleton
-              animation="wave"
-              height={20}
-              width={skeletonWidth}
+              className="h-5"
+              style={{ width: `${skeletonWidth}px` }}
               {...skeletonProps}
             />
           ) : columnDefType === 'display' &&

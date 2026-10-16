@@ -1,0 +1,277 @@
+/**
+ * Global Styles for Material React Table
+ * 
+ * This file defines the CSS variables and base styles for Material React Table.
+ * It includes:
+ * - CSS variable definitions for light and dark modes
+ * - Tailwind directives for base, components, and utilities
+ * - Base element styling
+ * - Runtime theme customization support
+ * 
+ * ## Customization
+ * 
+ * To customize the theme, override these CSS variables in your own global CSS:
+ * 
+ * ```css
+ * :root {
+ *   --primary: 221 83% 53%;
+ *   --primary-foreground: 210 40% 98%;
+ *   --radius: 0.5rem;
+ * }
+ * ```
+ * 
+ * For dark mode customization:
+ * 
+ * ```css
+ * .dark {
+ *   --primary: 217 91% 60%;
+ *   --background: 222 84% 5%;
+ * }
+ * ```
+ * 
+ * ## Runtime Theme Switching
+ * 
+ * To switch themes at runtime, update CSS variables via JavaScript:
+ * 
+ * ```javascript
+ * document.documentElement.style.setProperty('--primary', '221 83% 53%');
+ * ```
+ * 
+ * To toggle dark mode, add/remove the 'dark' class:
+ * 
+ * ```javascript
+ * document.documentElement.classList.toggle('dark');
+ * ```
+ * 
+ * See THEME_CUSTOMIZATION.md for detailed customization guide.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * =============================================================================
+ * LIGHT MODE THEME VARIABLES
+ * =============================================================================
+ * 
+ * These variables define the default light theme colors.
+ * All colors use HSL format: hue saturation% lightness%
+ * 
+ * The HSL format is used because:
+ * 1. It's human-readable and easy to adjust
+ * 2. It works well with Tailwind's color system
+ * 3. It supports alpha channel for transparency
+ * 4. It's widely supported across browsers
+ * 
+ * Color Tokens:
+ * - background/foreground: Main background and text colors
+ * - card: Card/paper background (table container)
+ * - popover: Dropdown and popover backgrounds
+ * - primary: Primary action color (buttons, links, active states)
+ * - secondary: Secondary UI elements (toolbar, pagination)
+ * - muted: Muted/disabled elements
+ * - accent: Hover states and highlights
+ * - destructive: Error states and delete actions
+ * - border: Border colors for cells and inputs
+ * - input: Input field backgrounds
+ * - ring: Focus ring for keyboard navigation
+ * - radius: Base border radius value
+ */
+@layer base {
+  :root {
+    /* Core Colors */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    /* Card/Paper Colors */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    /* Popover/Dropdown Colors */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    /* Primary Brand Colors */
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    
+    /* Secondary UI Colors */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    /* Muted/Disabled Colors */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    /* Accent/Highlight Colors */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    /* Destructive/Error Colors */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    
+    /* Border and Input Colors */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    
+    /* Focus Ring Color */
+    --ring: 221.2 83.2% 53.3%;
+    
+    /* Border Radius */
+    --radius: 0.5rem;
+    
+    /* Chart Colors (for data visualization) */
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  /**
+   * ===========================================================================
+   * DARK MODE THEME VARIABLES
+   * ===========================================================================
+   * 
+   * These variables override the light theme when the 'dark' class
+   * is present on a parent element.
+   * 
+   * Dark mode uses inverted lightness values and adjusted colors
+   * for better contrast and readability in low-light environments.
+   * 
+   * To enable dark mode, add the 'dark' class to any parent element:
+   * ```html
+   * <div class="dark">
+   *   <MaterialReactTable {...props} />
+   * </div>
+   * ```
+   * 
+   * Or apply it to the document root for site-wide dark mode:
+   * ```javascript
+   * document.documentElement.classList.add('dark');
+   * ```
+   */
+  .dark {
+    /* Core Colors - Inverted */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    
+    /* Card/Paper Colors - Slightly lighter than background */
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    
+    /* Popover/Dropdown Colors */
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    
+    /* Primary Brand Colors - Brighter for dark mode */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    
+    /* Secondary UI Colors - Darker for contrast */
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    
+    /* Muted/Disabled Colors */
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    /* Accent/Highlight Colors */
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    
+    /* Destructive/Error Colors - Darker for dark mode */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    
+    /* Border and Input Colors - Subtle in dark mode */
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    
+    /* Focus Ring Color */
+    --ring: 224.3 76.3% 48%;
+    
+    /* Chart Colors (adjusted for dark mode) */
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+/**
+ * =============================================================================
+ * COMPUTED THEME VARIABLES
+ * =============================================================================
+ * 
+ * These variables are computed from the base variables above.
+ * They provide additional border radius sizes and are automatically
+ * updated when the base --radius variable changes.
+ * 
+ * This enables runtime customization of border radius across all components:
+ * ```javascript
+ * document.documentElement.style.setProperty('--radius', '1rem');
+ * ```
+ */
+@layer base {
+  :root {
+    /* Computed Border Radius Sizes */
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: calc(var(--radius) + 8px);
+  }
+}
+
+/**
+ * =============================================================================
+ * BASE ELEMENT STYLES
+ * =============================================================================
+ * 
+ * Applies default border and background colors to all elements.
+ * This ensures consistent styling across the table components.
+ * 
+ * The wildcard selector (*) applies border-border to all elements,
+ * ensuring consistent border colors throughout the table.
+ * 
+ * The body selector applies the background and foreground colors,
+ * which cascade to all child elements unless overridden.
+ */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/**
+ * =============================================================================
+ * UTILITY LAYER ENHANCEMENTS
+ * =============================================================================
+ * 
+ * Additional utility classes for common patterns in Material React Table.
+ * These utilities leverage the CSS variables defined above.
+ */
+@layer utilities {
+  /* Focus ring utilities for keyboard navigation */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+  
+  /* Hover state utilities */
+  .hover-accent {
+    @apply hover:bg-accent hover:text-accent-foreground;
+  }
+  
+  /* Transition utilities for smooth theme switching */
+  .theme-transition {
+    @apply transition-colors duration-200;
+  }
+}

@@ -1,5 +1,4 @@
 import { type DragEvent, type RefObject } from 'react';
-import { type IconButtonProps } from '@mui/material/IconButton';
 import {
   type MRT_Row,
   type MRT_RowData,
@@ -7,6 +6,15 @@ import {
 } from '../../types';
 import { parseFromValuesOrFunc } from '../../utils/utils';
 import { MRT_GrabHandleButton } from '../buttons/MRT_GrabHandleButton';
+
+// IconButtonProps type for compatibility
+interface IconButtonProps {
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+  onDragStart?: (event: DragEvent<HTMLButtonElement>) => void;
+  onDragEnd?: (event: DragEvent<HTMLButtonElement>) => void;
+}
 
 export interface MRT_TableBodyRowGrabHandleProps<TData extends MRT_RowData>
   extends IconButtonProps {

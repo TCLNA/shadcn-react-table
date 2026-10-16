@@ -27,6 +27,10 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES6",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "references": [
     {

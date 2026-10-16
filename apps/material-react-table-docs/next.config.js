@@ -2,6 +2,9 @@
 
 const nextConfig = {
   transpilePackages: ['material-react-table', '@mui/x-charts', 'date-fns'],
+  experimental: {
+    esmExternals: 'loose',
+  },
   reactStrictMode: true,
   i18n: {
     locales: ['en'],
@@ -107,9 +110,9 @@ const withMDX = require('@next/mdx')({
 
 const { withPlausibleProxy } = require('next-plausible');
 
-module.exports = {
-  ...withPlausibleProxy()({ ...nextConfig }),
-  ...withMDX({
+module.exports = withPlausibleProxy()(
+  withMDX({
+    ...nextConfig,
     pageExtensions: ['js', 'ts', 'tsx', 'jsx', 'md', 'mdx'],
   }),
-};
+);

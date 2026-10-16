@@ -31,7 +31,7 @@ const columns: MRT_ColumnDef<(typeof data)[0]>[] = [
           },
         })}
       >
-        <>{cell.getValue<string>()}</>
+        <>{(cell.getValue() as string)}</>
       </Link>
     ),
   },
@@ -45,10 +45,10 @@ const columns: MRT_ColumnDef<(typeof data)[0]>[] = [
     header: 'Bundle Size',
     Cell: ({ cell, row }) => (
       <Box sx={{ display: 'flex', alignContent: 'center', gap: '1ch' }}>
-        {`${cell.getValue<string>()} KB`}
+        {`${(cell.getValue() as string)} KB`}
         <a href={row.original.bundlePhobiaLink} target="_blank" rel="noopener">
           <img
-            alt={cell.getValue<string>()}
+            alt={(cell.getValue() as string)}
             loading="lazy"
             src={row.original.bundlePhobiaImg}
           />
@@ -157,5 +157,5 @@ export const ComparisonTable = () => {
     enableColumnActions: false,
   });
 
-  return <MRT_TableContainer component={Paper} table={table} />;
+  return <MRT_TableContainer table={table} />;
 };

@@ -66,7 +66,6 @@ const Example = () => {
                     key={header.id}
                     header={header}
                     table={table}
-                    in
                   />
                 ),
             )}

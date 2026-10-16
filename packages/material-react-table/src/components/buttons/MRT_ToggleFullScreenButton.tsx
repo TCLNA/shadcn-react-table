@@ -1,10 +1,8 @@
-import { useState } from 'react';
-import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import { type MRT_RowData, type MRT_TableInstance } from '../../types';
+import { MRT_IconButton, type MRT_IconButtonProps } from './MRT_IconButton';
 
 export interface MRT_ToggleFullScreenButtonProps<TData extends MRT_RowData>
-  extends IconButtonProps {
+  extends Omit<MRT_IconButtonProps, 'tooltip'> {
   table: MRT_TableInstance<TData>;
 }
 
@@ -22,30 +20,18 @@ export const MRT_ToggleFullScreenButton = <TData extends MRT_RowData>({
   } = table;
   const { isFullScreen } = getState();
 
-  const [tooltipOpened, setTooltipOpened] = useState(false);
-
   const handleToggleFullScreen = () => {
-    setTooltipOpened(false);
     setIsFullScreen(!isFullScreen);
   };
 
   return (
-    <Tooltip
-      open={tooltipOpened}
-      title={rest?.title ?? localization.toggleFullScreen}
+    <MRT_IconButton
+      aria-label={localization.toggleFullScreen}
+      onClick={handleToggleFullScreen}
+      tooltip={localization.toggleFullScreen}
+      {...rest}
     >
-      <IconButton
-        aria-label={localization.toggleFullScreen}
-        onBlur={() => setTooltipOpened(false)}
-        onClick={handleToggleFullScreen}
-        onFocus={() => setTooltipOpened(true)}
-        onMouseEnter={() => setTooltipOpened(true)}
-        onMouseLeave={() => setTooltipOpened(false)}
-        {...rest}
-        title={undefined}
-      >
-        {isFullScreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-      </IconButton>
-    </Tooltip>
+      {isFullScreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+    </MRT_IconButton>
   );
 };

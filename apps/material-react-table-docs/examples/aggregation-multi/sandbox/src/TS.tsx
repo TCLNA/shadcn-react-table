@@ -42,30 +42,26 @@ const Example = () => {
           <>
             Count:{' '}
             <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
-              {cell.getValue<Array<number>>()?.[0]}
+              {(cell.getValue() as Array<number>)?.[0]}
             </Box>
             Average:{' '}
             <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
-              {cell
-                .getValue<Array<number>>()?.[1]
+              {(cell.getValue() as Array<number>)?.[1]
                 ?.toLocaleString?.('en-US', localeStringOptions)}
             </Box>
             Median:{' '}
             <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
-              {cell
-                .getValue<Array<number>>()?.[2]
+              {(cell.getValue() as Array<number>)?.[2]
                 ?.toLocaleString?.('en-US', localeStringOptions)}
             </Box>
             Min:{' '}
             <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
-              {cell
-                .getValue<Array<number>>()?.[3]
+              {(cell.getValue() as Array<number>)?.[3]
                 ?.toLocaleString?.('en-US', localeStringOptions)}
             </Box>
             Max:{' '}
             <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
-              {cell
-                .getValue<Array<number>>()?.[4]
+              {(cell.getValue() as Array<number>)?.[4]
                 ?.toLocaleString?.('en-US', localeStringOptions)}
             </Box>
           </>
@@ -73,8 +69,7 @@ const Example = () => {
         //customize normal cell render on normal non-aggregated rows
         Cell: ({ cell }) => (
           <>
-            {cell
-              .getValue<number>()
+            {(cell.getValue() as number)
               ?.toLocaleString?.('en-US', localeStringOptions)}
           </>
         ),

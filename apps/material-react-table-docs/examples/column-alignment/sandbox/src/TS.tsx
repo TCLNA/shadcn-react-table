@@ -51,8 +51,7 @@ const Example = () => {
           align: 'right',
         },
         Cell: ({ cell }) =>
-          cell
-            .getValue<number>()
+          (cell.getValue() as number)
             .toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
       },
     ],

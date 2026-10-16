@@ -93,10 +93,10 @@ const Example = () => {
                 component="span"
                 sx={(theme) => ({
                   backgroundColor:
-                    cell.getValue<number>() < 50_000
+                    (cell.getValue() as number) < 50_000
                       ? theme.palette.error.dark
-                      : cell.getValue<number>() >= 50_000 &&
-                          cell.getValue<number>() < 75_000
+                      : (cell.getValue() as number) >= 50_000 &&
+                          (cell.getValue() as number) < 75_000
                         ? theme.palette.warning.dark
                         : theme.palette.success.dark,
                   borderRadius: '0.25rem',
@@ -105,7 +105,7 @@ const Example = () => {
                   p: '0.25rem',
                 })}
               >
-                {cell.getValue<number>()?.toLocaleString?.('en-US', {
+                {(cell.getValue() as number)?.toLocaleString?.('en-US', {
                   style: 'currency',
                   currency: 'USD',
                   minimumFractionDigits: 0,
@@ -126,7 +126,7 @@ const Example = () => {
             filterVariant: 'date',
             filterFn: 'lessThan',
             sortingFn: 'datetime',
-            Cell: ({ cell }) => cell.getValue<Date>()?.toLocaleDateString(), //render Date as a string
+            Cell: ({ cell }) => (cell.getValue() as Date)?.toLocaleDateString(), //render Date as a string
             Header: ({ column }) => <em>{column.columnDef.header}</em>, //custom header markup
             muiFilterTextFieldProps: {
               sx: {

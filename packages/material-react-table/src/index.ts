@@ -1,11 +1,19 @@
 export * from './types';
 
+//theme
+export * from './theme';
+
+//icons
+export * from './icons';
+
 //helpers
 export * from './utils/tanstack.helpers';
 export * from './utils/cell.utils';
 export * from './utils/column.utils';
 export * from './utils/displayColumn.utils';
 export * from './utils/row.utils';
+export * from './utils/theme.utils';
+export * from './utils/prop-compat.utils';
 
 //fns
 export * from './fns/aggregationFns';
@@ -32,12 +40,14 @@ export * from './components/body/MRT_TableBodyRowGrabHandle';
 export * from './components/body/MRT_TableBodyRowPinButton';
 export * from './components/body/MRT_TableDetailPanel';
 //button components
+export * from './components/buttons/MRT_Button';
 export * from './components/buttons/MRT_ColumnPinningButtons';
 export * from './components/buttons/MRT_CopyButton';
 export * from './components/buttons/MRT_EditActionButtons';
 export * from './components/buttons/MRT_ExpandAllButton';
 export * from './components/buttons/MRT_ExpandButton';
 export * from './components/buttons/MRT_GrabHandleButton';
+export * from './components/buttons/MRT_IconButton';
 export * from './components/buttons/MRT_RowPinButton';
 export * from './components/buttons/MRT_ShowHideColumnsButton';
 export * from './components/buttons/MRT_ToggleDensePaddingButton';
@@ -60,6 +70,8 @@ export * from './components/head/MRT_TableHeadCellResizeHandle';
 export * from './components/head/MRT_TableHeadCellSortLabel';
 export * from './components/head/MRT_TableHeadRow';
 //input components
+export * from './components/inputs/MRT_DatePicker';
+export * from './components/inputs/MRT_DateRangePicker';
 export * from './components/inputs/MRT_EditCellTextField';
 export * from './components/inputs/MRT_FilterCheckbox';
 export * from './components/inputs/MRT_FilterRangeFields';

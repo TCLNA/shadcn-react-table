@@ -1,0 +1,200 @@
+import Head from 'next/head';
+
+<Head>
+  <title>Migrating to shadcn/ui - Material React Table V3 Docs</title>
+  <meta
+    name="description"
+    content="Guide for migrating from Material UI to shadcn/ui in Material React Table"
+  />
+</Head>
+
+## Migration Guide: MUI to shadcn/ui
+
+This guide documents the migration from Material UI V6 to shadcn/ui with Tailwind CSS. While the public API remains largely unchanged, there are some important differences to be aware of.
+
+### Icon System Changes
+
+Material React Table now uses [lucide-react](https://lucide.dev/) icons instead of Material UI icons. The icon mapping has been carefully chosen to maintain visual consistency and semantic meaning.
+
+#### Icon Mapping Reference
+
+The following table shows how Material UI icons have been mapped to lucide-react equivalents:
+
+| MUI Icon              | lucide-react Icon  | Usage                          |
+|-----------------------|--------------------|--------------------------------|
+| ArrowDownward         | ArrowDown          | Sorting, navigation            |
+| ArrowUpward           | ArrowUp            | Sorting, navigation            |
+| FilterList            | Filter             | Column filtering               |
+| Search                | Search             | Global search                  |
+| Close                 | X                  | Close dialogs, clear filters   |
+| MoreVert              | MoreVertical       | Row/column action menus        |
+| Edit                  | Pencil             | Edit actions                   |
+| Delete                | Trash2             | Delete actions                 |
+| Save                  | Save               | Save actions                   |
+| Cancel                | X                  | Cancel actions                 |
+| Add                   | Plus               | Add row/column                 |
+| Remove                | Minus              | Remove row/column              |
+| ExpandMore            | ChevronDown        | Expand rows/sections           |
+| ChevronRight          | ChevronRight       | Collapse rows/sections         |
+| DragIndicator         | GripVertical       | Drag handle for rows/columns   |
+| Visibility            | Eye                | Show/hide columns              |
+| VisibilityOff         | EyeOff             | Show/hide columns              |
+| ContentCopy           | Copy               | Copy to clipboard              |
+| Fullscreen            | Maximize           | Enter fullscreen               |
+| FullscreenExit        | Minimize           | Exit fullscreen                |
+| FirstPage             | ChevronsLeft       | Pagination first page          |
+| LastPage              | ChevronsRight      | Pagination last page           |
+| ViewColumn            | Columns3           | Column visibility menu         |
+| RestartAlt            | RotateCcw          | Reset filters/state            |
+| PushPin               | Pin                | Pin columns                    |
+| DensityLarge          | AlignJustify       | Large density mode             |
+| DensityMedium         | AlignCenter        | Medium density mode            |
+| DensitySmall          | AlignLeft          | Small density mode             |
+| SyncAlt               | ArrowUpDown        | Sort direction toggle          |
+| DynamicFeed           | Layers             | Multiple selection/grouping    |
+
+#### Customizing Icons
+
+You can still customize icons using the `icons` table option. The icon names remain the same for backward compatibility:
+
+```tsx
+import { MaterialReactTable } from 'material-react-table';
+import { Star } from 'lucide-react';
+
+<MaterialReactTable
+  columns={columns}
+  data={data}
+  icons={{
+    // Override with custom lucide-react icon
+    SearchIcon: Star,
+    // Or use a custom component
+    FilterListIcon: (props) => <MyCustomIcon {...props} />,
+  }}
+/>
+```
+
+#### Using the Icon Utilities
+
+The library provides utility functions for working with icons:
+
+```tsx
+import { getIcon, mergeIcons } from 'material-react-table';
+
+// Get a specific icon (with optional custom overrides)
+const SearchIcon = getIcon('SearchIcon', customIcons);
+
+// Merge custom icons with defaults
+const icons = mergeIcons({
+  SearchIcon: MyCustomSearchIcon,
+  FilterListIcon: MyCustomFilterIcon,
+});
+```
+
+### Styling Changes
+
+The library now uses Tailwind CSS instead of Emotion for styling. This means:
+
+- All components use Tailwind utility classes
+- Custom styling should use Tailwind classes via the `className` prop
+- Theme customization is done through Tailwind configuration
+
+#### Component-Specific Changes
+
+**MRT_TablePaper (Table Container)**
+
+The table container component has been migrated from MUI's `Paper` component to a standard `div` with Tailwind classes:
+
+- **Elevation**: The `elevation` prop is now mapped to Tailwind shadow utilities:
+  - `elevation={0}` → no shadow
+  - `elevation={1}` → `shadow-sm`
+  - `elevation={2}` → `shadow` (default)
+  - `elevation={3}` → `shadow-md`
+  - `elevation={4}` → `shadow-lg`
+  - `elevation={5}` → `shadow-xl`
+  - `elevation={6}` → `shadow-2xl`
+
+- **Base Styling**: The component uses these Tailwind classes by default:
+  - `rounded-lg` - rounded corners
+  - `border` - border styling
+  - `bg-card` - background color from theme
+  - `overflow-hidden` - content clipping
+  - `transition-all duration-100` - smooth transitions
+
+- **Fullscreen Mode**: Fullscreen styling is maintained with inline styles for dynamic positioning
+
+#### Before (Emotion):
+```tsx
+<MaterialReactTable
+  muiTableProps={{
+    sx: {
+      padding: '16px',
+      backgroundColor: 'background.paper',
+    },
+  }}
+/>
+```
+
+#### After (Tailwind):
+```tsx
+<MaterialReactTable
+  tableProps={{
+    className: 'p-4 bg-card',
+  }}
+/>
+```
+
+### Prop Name Changes
+
+Props that were prefixed with `mui` have been renamed to remove the prefix:
+
+- `muiTableProps` → `tableProps`
+- `muiTableHeadCellProps` → `tableHeadCellProps`
+- `muiTableBodyCellProps` → `tableBodyCellProps`
+- And so on...
+
+**Note:** The old prop names are still supported for backward compatibility but are deprecated.
+
+### Theme Customization
+
+Theme customization is now done through Tailwind configuration instead of MUI's theme system:
+
+```js
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: 'hsl(221, 83%, 53%)',
+        secondary: 'hsl(210, 40%, 96%)',
+        // ... other colors
+      },
+    },
+  },
+};
+```
+
+### Breaking Changes
+
+1. **Icon Library**: Material UI icons are no longer used. If you were importing icons from `@mui/icons-material` for use with the table, you'll need to switch to lucide-react or another icon library.
+
+2. **Styling Approach**: Emotion CSS-in-JS is no longer used. Custom styles should use Tailwind classes.
+
+3. **Theme System**: MUI's theme system is no longer available. Use Tailwind configuration for theming.
+
+### Migration Checklist
+
+- [ ] Update icon imports from `@mui/icons-material` to `lucide-react`
+- [ ] Replace `mui*` prefixed props with their non-prefixed equivalents
+- [ ] Convert Emotion `sx` props to Tailwind `className` props
+- [ ] Update theme customization to use Tailwind configuration
+- [ ] Test all custom styling and icon overrides
+- [ ] Update any custom components that depend on MUI components
+
+### Need Help?
+
+If you encounter issues during migration, please:
+
+1. Check the [customize-icons guide](/docs/guides/customize-icons) for icon customization examples
+2. Review the [API documentation](/docs/api) for updated prop interfaces
+3. Open an issue on [GitHub](https://github.com/KevinVandy/material-react-table/issues) if you find bugs
+
